@@ -1,0 +1,9 @@
+VPC
+├── Public Subnets
+│   ├── CloudFront origin (ALB)
+│   └── Application Load Balancer
+│
+└── Private Subnets
+    ├── ECS EC2 instances
+    ├── RDS PostgreSQL
+    └── EFS

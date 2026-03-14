@@ -1,0 +1,52 @@
+[
+  {
+    "name": "odoo",
+    "image": "odoo:19.0",
+    "cpu": 768,
+    "memory": 3072,
+    "essential": true,
+    "environment": [
+      {
+        "name": "HOST",
+        "value": "${db_host}"
+      },
+      {
+        "name": "USER",
+        "value": "odoo"
+      },
+      {
+        "name": "PASSWORD",
+        "value": "${db_password}"
+      }
+    ],
+    "portMappings": [
+      {
+        "containerPort": 8069
+      },
+      {
+        "containerPort": 8072
+      }
+    ],
+    "mountPoints": [
+      {
+        "sourceVolume": "odoo-efs",
+        "containerPath": "/var/lib/odoo"
+      }
+    ]
+  },
+  {
+    "name": "nginx",
+    "image": "nginx:1.26-alpine",
+    "cpu": 256,
+    "memory": 512,
+    "essential": true,
+    "portMappings": [
+      {
+        "containerPort": 80
+      }
+    ],
+    "links": [
+      "odoo"
+    ]
+  }
+]

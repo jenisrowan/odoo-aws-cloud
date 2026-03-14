@@ -1,0 +1,10 @@
+ECS Cluster
+ ├── EC2 Instance
+ │    ├── Nginx container
+ │    └── Odoo container
+
+Task
+ ├── nginx
+ └── odoo:19
+
+Use Nginx only as an Reverse proxy and websocket forwarding (chat)
