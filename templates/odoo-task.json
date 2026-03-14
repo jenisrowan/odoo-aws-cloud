@@ -1,7 +1,7 @@
 [
   {
     "name": "odoo",
-    "image": "odoo:19.0",
+    "image": "${odoo_image_url}",
     "cpu": 768,
     "memory": 3072,
     "essential": true,
@@ -36,7 +36,7 @@
   },
   {
     "name": "nginx",
-    "image": "nginx:1.26-alpine",
+    "image": "${nginx_image_url}",
     "cpu": 256,
     "memory": 512,
     "essential": true,

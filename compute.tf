@@ -73,8 +73,10 @@ resource "aws_ecs_task_definition" "odoo" {
   memory = "3584"
 
   container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
-    db_host     = aws_db_instance.postgres.address
-    db_password = var.db_password
+    db_host         = aws_db_instance.postgres.address
+    db_password     = var.db_password
+    nginx_image_url = var.nginx_image_url
+    odoo_image_url  = var.odoo_image_url
   })
 
   volume {

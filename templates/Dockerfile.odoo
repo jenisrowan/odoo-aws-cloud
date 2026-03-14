@@ -1,0 +1,11 @@
+FROM odoo:19.0
+
+USER root
+
+# Copy the custom Odoo configuration file
+COPY odoo.conf /etc/odoo/odoo.conf
+
+# Ensure correct ownership
+RUN chown odoo:odoo /etc/odoo/odoo.conf
+
+USER odoo
