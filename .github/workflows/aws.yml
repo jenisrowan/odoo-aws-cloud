@@ -1,8 +1,7 @@
 name: Deploy Odoo to AWS via Terraform
 
 on:
-  push:
-    branches: [ "main" ]
+  workflow_dispatch:
 
 env:
   AWS_REGION: ap-south-1
