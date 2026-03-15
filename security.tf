@@ -1,3 +1,4 @@
+# Security group for ALB
 resource "aws_security_group" "alb_sg" {
   name        = "odoo-alb-sg"
   description = "Allow HTTP/HTTPS inbound traffic"

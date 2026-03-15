@@ -1,17 +1,17 @@
 resource "aws_efs_file_system" "odoo" {
   creation_token   = "odoo-efs"
   performance_mode = "generalPurpose"
-  throughput_mode  = "bursting"
+  throughput_mode  = "elastic"
 
-  # Intelligent Tiering: move to IA after 60 days (~2 months) of no access
+  # Intelligent Tiering: move to IA after 30 days
   lifecycle_policy {
-    transition_to_ia = "AFTER_60_DAYS"
+    transition_to_ia = "AFTER_30_DAYS"
   }
 
-  # Archive storage: move to Archive if not accessed for 6 months
+  # Archive storage: move to Archive if not accessed for 90 days
   # We can use Archive storage class because we are using regional EFS
   lifecycle_policy {
-    transition_to_archive = "AFTER_180_DAYS"
+    transition_to_archive = "AFTER_90_DAYS"
   }
 
   # Move back to Standard storage immediately on first access

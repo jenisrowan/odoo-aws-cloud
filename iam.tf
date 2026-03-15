@@ -9,6 +9,7 @@ data "aws_iam_policy_document" "ecs_task_trust" {
   }
 }
 
+# IAM role for ECS task execution - allows ECS to pull images from ECR and write CloudWatch logs
 resource "aws_iam_role" "ecs_task_execution_role" {
   name               = "odoo-ecs-task-execution-role"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_trust.json
