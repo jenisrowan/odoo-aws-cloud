@@ -3,6 +3,7 @@ resource "aws_cloudfront_distribution" "odoo" {
     domain_name = aws_lb.main.dns_name
     origin_id   = "alb-origin"
 
+    # By default cloudfront expects S3 but we want our ALB behind the cloudfront
     custom_origin_config {
       http_port              = 80
       https_port             = 443
@@ -13,6 +14,7 @@ resource "aws_cloudfront_distribution" "odoo" {
 
   enabled = true
 
+  # Default caching behaviour for Odoo
   default_cache_behavior {
     target_origin_id       = "alb-origin"
     viewer_protocol_policy = "redirect-to-https"
@@ -29,6 +31,7 @@ resource "aws_cloudfront_distribution" "odoo" {
     max_ttl     = 0
   }
 
+  # Caching behaviour for core odoo static assets
   ordered_cache_behavior {
     path_pattern           = "/web/static/*"
     target_origin_id       = "alb-origin"

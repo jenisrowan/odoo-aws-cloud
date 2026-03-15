@@ -28,9 +28,10 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
+# Allow nginx from ALB and expose odoo's 8069 and 8072 ports
 resource "aws_security_group" "ecs_sg" {
   name        = "odoo-ecs-sg"
-  description = "Allow traffic from ALB to ECS instances"
+  description = "Allow traffic from ALB to ECS instances. Also, expose odoo specific ports."
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -65,6 +66,7 @@ resource "aws_security_group" "ecs_sg" {
   }
 }
 
+# Expose the default postgres port to ECS instances
 resource "aws_security_group" "rds_sg" {
   name        = "odoo-rds-sg"
   description = "Allow Postgres traffic from ECS"
@@ -86,6 +88,7 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
+# Allow NFS from ECS instances
 resource "aws_security_group" "efs_sg" {
   name        = "odoo-efs-sg"
   description = "Allow NFS traffic from ECS"
