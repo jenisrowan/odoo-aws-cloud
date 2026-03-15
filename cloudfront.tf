@@ -1,30 +1,19 @@
 resource "aws_cloudfront_distribution" "odoo" {
-
   origin {
-
     domain_name = aws_lb.main.dns_name
-
-    origin_id = "alb-origin"
+    origin_id   = "alb-origin"
   }
 
   enabled = true
 
   default_cache_behavior {
-
-    target_origin_id = "alb-origin"
-
+    target_origin_id       = "alb-origin"
     viewer_protocol_policy = "redirect-to-https"
-
-    allowed_methods = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
-
-    cached_methods = ["GET", "HEAD"]
-
+    allowed_methods        = ["GET", "HEAD", "OPTIONS", "PUT", "POST", "PATCH", "DELETE"]
+    cached_methods         = ["GET", "HEAD"]
     forwarded_values {
-
       query_string = true
-
       cookies {
-
         forward = "all"
       }
     }
@@ -32,26 +21,17 @@ resource "aws_cloudfront_distribution" "odoo" {
   }
 
   ordered_cache_behavior {
-
-    path_pattern = "/web/static/*"
-
-    target_origin_id = "alb-origin"
-
+    path_pattern           = "/web/static/*"
+    target_origin_id       = "alb-origin"
     viewer_protocol_policy = "redirect-to-https"
-
-    allowed_methods = ["GET", "HEAD"]
-
-    cached_methods = ["GET", "HEAD"]
-
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
     forwarded_values {
-
       query_string = false
-
       cookies {
         forward = "none"
       }
     }
-
     min_ttl = 3600
   }
 

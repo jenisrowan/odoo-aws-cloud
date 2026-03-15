@@ -23,7 +23,7 @@ EOF
 
 # Autoscale physical EC2 servers
 resource "aws_autoscaling_group" "ecs_asg" {
-  vpc_zone_identifier = [aws_subnet.private.id]
+  vpc_zone_identifier = [aws_subnet.private.id, aws_subnet.private2.id]
   min_size            = 1
   max_size            = 4
   desired_capacity    = 1
@@ -52,7 +52,7 @@ resource "aws_ecs_capacity_provider" "odoo" {
 }
 
 resource "aws_ecs_cluster_capacity_providers" "odoo" {
-  cluster_name = aws_ecs_cluster.odoo.name
+  cluster_name       = aws_ecs_cluster.odoo.name
   capacity_providers = [aws_ecs_capacity_provider.odoo.name]
 
   default_capacity_provider_strategy {
