@@ -51,13 +51,10 @@ resource "aws_route_table_association" "public_b" {
   route_table_id = aws_route_table.public.id
 }
 
-resource "aws_eip" "nat" {
-  domain = "vpc"
-}
-
+# --- REGIONAL NAT GATEWAY ---
 resource "aws_nat_gateway" "main" {
-  allocation_id = aws_eip.nat.id
-  subnet_id     = aws_subnet.public_a.id
+  availability_mode = "regional"
+  vpc_id            = aws_vpc.main.id
 }
 
 resource "aws_route_table" "private" {

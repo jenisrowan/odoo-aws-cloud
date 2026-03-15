@@ -1,4 +1,4 @@
-      USER (Internet)
+       USER (Internet)
               |
               ▼
  [ CloudFront Distribution ] (Global Edge)
@@ -17,19 +17,20 @@
 |             |               | |              |              | |      [ Odoo Task ]           | |      [ Odoo Task ]           |
 |             +---------------|-|--------------+--------------|-|---->       |       ----------|-|---->       |                 |
 |                             | |                             | |            | (Reads/Writes)  | |            | (Reads/Writes)  |
-|       [ NAT Gateway ] <-----|-|-----------------------------|-|------------+-----------------|-|------------+                 |
-+-------------|---------------+ +-----------------------------+ |            ▼                 | |            ▼                 |
-              |                                                 |    [ EFS Mount Target ] <----|-|-> [ EFS Mount Target ]       |
-              |                                                 |            |                 | |            |                 |
-              |                                                 |            ▼                 | |            ▼                 |
-              |                                                 |    [ RDS Postgres ] (Pri) ---|-|-> [ RDS Postgres ] (Replica) |
-              |                                                 +------------------------------+ +------------------------------+
-              |                                                              |
-              └──────────────────────────────────────────────────────────────┘
+|   [ Regional NAT GW ] <-----|-|-----[ Regional NAT GW ] <---|-|------------+-----------------|-|------------+                 |
++-------------|---------------+ +--------------|--------------+ |            ▼                 | |            ▼                 |
+              |                                |                |    [ EFS Mount Target ] <----|-|-> [ EFS Mount Target ]       |
+              |                                |                |            |                 | |            |                 |
+              |                                |                |            ▼                 | |            ▼                 |
+              |                                |                |    [ RDS Postgres ] (Pri) ---|-|-> [ RDS Postgres ] (Replica) |
+              |                                |                +------------------------------+ +------------------------------+
+              |                                |                               |
+              └────────────────────────────────┴───────────────────────────────┘
                                   (Outgoing Traffic Only)
 
 Notes:
   - [ Load Balancer ] is a single ALB (aws_lb.main) spanning both public subnets for HA.
+  - [ Regional NAT GW ] is a single logical resource in Automatic Mode that AWS scales dynamically across active AZs. Saves money by eliminating cross-AZ data transfer fees, and automatically cuts hourly compute costs by retracting from specific AZs when no active workloads are running there.
   - [ ECS Service ] is a single service whose tasks are scheduled across both private subnets via the ASG.
   - [ EFS Mount Target ] are two mount targets of one shared EFS file system (aws_efs_file_system.odoo).
   - [ RDS Postgres ] is a single instance with multi_az=true; AWS manages the standby replica automatically.
