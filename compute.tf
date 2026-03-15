@@ -110,7 +110,7 @@ resource "aws_ecs_service" "odoo" {
   task_definition = aws_ecs_task_definition.odoo.arn
   desired_count   = 1
 
-  health_check_grace_period_seconds = 150
+  health_check_grace_period_seconds = 120
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.odoo.name
