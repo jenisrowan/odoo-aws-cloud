@@ -7,7 +7,7 @@ data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
 }
 
-# 2. EC2 Infrastructure (Launch Template & ASG)
+# 2. EC2 Infrastructure
 resource "aws_launch_template" "ecs" {
   name_prefix   = "odoo-ecs-template-"
   image_id      = data.aws_ssm_parameter.ecs_optimized_ami.value
@@ -15,6 +15,7 @@ resource "aws_launch_template" "ecs" {
 
   update_default_version = true
 
+  # We give the EC2 no ingress (inbound) rules
   vpc_security_group_ids = [aws_security_group.ecs_node_sg.id]
 
   iam_instance_profile {
@@ -70,14 +71,16 @@ resource "aws_ecs_cluster_capacity_providers" "odoo" {
   }
 }
 
-# 4. Task Definition & Service
+# 4. Task Definition
 resource "aws_ecs_task_definition" "odoo" {
   family                   = "odoo"
   requires_compatibilities = ["EC2"]
   network_mode             = "awsvpc"
   # Even though m7i-flex.large has max of 3 ENI m7i-flex.large
   # has only 8gb of ram; using more than 2 containers of odoo 19 is going to slow the instance down.
-  
+  # We will use network_mode as awsvpc instead of bridge
+  # With awsvpc we can connect the alb directly to the container bypassing the EC2
+
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   cpu    = "1024"
@@ -88,6 +91,7 @@ resource "aws_ecs_task_definition" "odoo" {
     db_password     = var.db_password
     nginx_image_url = var.nginx_image_url
     odoo_image_url  = var.odoo_image_url
+    aws_region      = var.region
   })
 
   volume {
@@ -99,11 +103,14 @@ resource "aws_ecs_task_definition" "odoo" {
   }
 }
 
+# 4.5 Orchestrator (or the manager)
 resource "aws_ecs_service" "odoo" {
   name            = "odoo-service"
   cluster         = aws_ecs_cluster.odoo.id
   task_definition = aws_ecs_task_definition.odoo.arn
   desired_count   = 1
+
+  health_check_grace_period_seconds = 150
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.odoo.name
@@ -112,6 +119,7 @@ resource "aws_ecs_service" "odoo" {
 
   network_configuration {
     subnets         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    # Opens access to Nginx
     security_groups = [aws_security_group.ecs_task_sg.id] 
   }
 
@@ -146,4 +154,9 @@ resource "aws_appautoscaling_policy" "ecs_cpu" {
 
     target_value = 75
   }
+}
+
+resource "aws_cloudwatch_log_group" "odoo_logs" {
+  name              = "/ecs/odoo"
+  retention_in_days = 7
 }
