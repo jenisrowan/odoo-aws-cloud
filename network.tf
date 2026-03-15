@@ -57,6 +57,8 @@ resource "aws_route_table_association" "public_b" {
 resource "aws_nat_gateway" "main" {
   availability_mode = "regional"
   vpc_id            = aws_vpc.main.id
+
+  depends_on = [aws_internet_gateway.main]
 }
 
 resource "aws_route_table" "private" {
