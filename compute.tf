@@ -30,10 +30,11 @@ EOF
 
 # Autoscale physical EC2 servers
 resource "aws_autoscaling_group" "ecs_asg" {
-  vpc_zone_identifier = [aws_subnet.private.id, aws_subnet.private2.id]
-  min_size            = 1
-  max_size            = 4
-  desired_capacity    = 1
+  vpc_zone_identifier  = [aws_subnet.private.id, aws_subnet.private2.id]
+  min_size             = 1
+  max_size             = 4
+  desired_capacity     = 1
+  protect_from_scale_in = true
 
   launch_template {
     id      = aws_launch_template.ecs.id
