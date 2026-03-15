@@ -3,10 +3,17 @@ resource "aws_ecs_cluster" "odoo" {
   name = "odoo-cluster"
 }
 
+data "aws_ssm_parameter" "ecs_optimized_ami" {
+  name = "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
+}
+
 # 2. EC2 Infrastructure (Launch Template & ASG)
 resource "aws_launch_template" "ecs" {
-  image_id      = var.ecs_ami
+  name_prefix   = "odoo-ecs-template-"
+  image_id      = data.aws_ssm_parameter.ecs_optimized_ami.value
   instance_type = "m7i-flex.large"
+
+  update_default_version = true
 
   vpc_security_group_ids = [aws_security_group.ecs_sg.id]
 

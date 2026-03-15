@@ -38,7 +38,6 @@ jobs:
     - name: Create ECR Repositories via Terraform
       env:
         TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
-        TF_VAR_ecs_ami: ${{ secrets.TF_VAR_ECS_AMI }}
       run: |
         terraform apply -auto-approve \
           -target="aws_ecr_repository.odoo" \
@@ -74,7 +73,6 @@ jobs:
       env:
         # Pass your sensitive Terraform variables from GitHub Secrets
         TF_VAR_db_password: ${{ secrets.TF_VAR_DB_PASSWORD }}
-        TF_VAR_ecs_ami: ${{ secrets.TF_VAR_ECS_AMI }}
       run: |
         terraform apply -auto-approve \
           -var="odoo_image_url=${{ env.odoo_image }}" \

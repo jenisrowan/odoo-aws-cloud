@@ -7,8 +7,6 @@ variable "db_password" {
   sensitive   = true
 }
 
-variable "ecs_ami" {}
-
 variable "nginx_image_url" {
   description = "The full ECR URL and tag for the custom Nginx image"
   type        = string
