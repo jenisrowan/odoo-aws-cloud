@@ -28,10 +28,23 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
-# Allow nginx from ALB and expose odoo's 8069 and 8072 ports
-resource "aws_security_group" "ecs_sg" {
-  name        = "odoo-ecs-sg"
-  description = "Allow traffic from ALB to ECS instances. Also, expose odoo specific ports."
+
+resource "aws_security_group" "ecs_node_sg" {
+  name        = "odoo-ecs-node-sg"
+  description = "Security group for underlying EC2 hosts"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "ecs_task_sg" {
+  name        = "odoo-ecs-task-sg"
+  description = "Allow traffic from ALB directly to the Odoo task ENI"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -42,22 +55,6 @@ resource "aws_security_group" "ecs_sg" {
     security_groups = [aws_security_group.alb_sg.id]
   }
 
-  ingress {
-    description = "Allow Odoo xmlrpc from ALB/within VPC"
-    from_port   = 8069
-    to_port     = 8069
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.main.cidr_block]
-  }
-
-  ingress {
-    description = "Allow Odoo gevent/longpolling"
-    from_port   = 8072
-    to_port     = 8072
-    protocol    = "tcp"
-    cidr_blocks = [aws_vpc.main.cidr_block]
-  }
-
   egress {
     from_port   = 0
     to_port     = 0
@@ -65,6 +62,7 @@ resource "aws_security_group" "ecs_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
 
 # Expose the default postgres port to ECS instances
 resource "aws_security_group" "rds_sg" {
@@ -77,7 +75,7 @@ resource "aws_security_group" "rds_sg" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_sg.id]
+    security_groups = [aws_security_group.ecs_task_sg.id]
   }
 
   egress {
@@ -99,7 +97,7 @@ resource "aws_security_group" "efs_sg" {
     from_port       = 2049
     to_port         = 2049
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_sg.id]
+    security_groups = [aws_security_group.ecs_task_sg.id]
   }
 
   egress {

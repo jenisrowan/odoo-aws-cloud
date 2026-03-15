@@ -2,6 +2,9 @@ resource "aws_efs_file_system" "odoo" {
   creation_token   = "odoo-efs"
   performance_mode = "generalPurpose"
   throughput_mode  = "elastic"
+  # Elastic is more expensive but most users will not touch 95% of the
+  # Files after 90 days, archive storage is much cheaper in the long run.
+  # Bursting doesn't give much saving unless we access files frequently and have a period of dormancy for the odoo usage.
 
   # Intelligent Tiering: move to IA after 30 days
   lifecycle_policy {

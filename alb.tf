@@ -12,8 +12,8 @@ resource "aws_lb_target_group" "odoo" {
   port        = 80
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
-  # target_type defaults to "instance" for EC2 type
-
+  target_type = "ip"
+  
   # Odoo's root path (/) redirects to /web/login (302), which ALB would treat
   # as unhealthy. /web/health is Odoo's built-in endpoint that always returns 200.
   health_check {

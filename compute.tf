@@ -15,7 +15,7 @@ resource "aws_launch_template" "ecs" {
 
   update_default_version = true
 
-  vpc_security_group_ids = [aws_security_group.ecs_sg.id]
+  vpc_security_group_ids = [aws_security_group.ecs_node_sg.id]
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ecs_instance_profile.name
@@ -74,7 +74,10 @@ resource "aws_ecs_cluster_capacity_providers" "odoo" {
 resource "aws_ecs_task_definition" "odoo" {
   family                   = "odoo"
   requires_compatibilities = ["EC2"]
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
+  # Even though m7i-flex.large has max of 3 ENI m7i-flex.large
+  # has only 8gb of ram; using more than 2 containers of odoo 19 is going to slow the instance down.
+  
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   cpu    = "1024"
@@ -105,6 +108,11 @@ resource "aws_ecs_service" "odoo" {
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.odoo.name
     weight            = 100
+  }
+
+  network_configuration {
+    subnets         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+    security_groups = [aws_security_group.ecs_task_sg.id] 
   }
 
   load_balancer {
