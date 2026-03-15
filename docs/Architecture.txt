@@ -1,29 +1,35 @@
-USER (Internet)
-      |
-      ▼
-[ CloudFront Distribution ] (Global Edge)
-      |
-      ▼
-[ Internet Gateway ] <--------------------------------------------- [ VPC: 10.0.0.0/16 ]
-      |                                                                    |
-      |          __________________________________________________________|__________________________________________________
-      |         |                                |                                 |                                          |
-      ▼         ▼                                ▼                                 ▼                                          ▼
-+-----------------------------+       +----------------------+       +-------------------------+       +-------------------------+
-|      PUBLIC SUBNET (A)      |       |  PUBLIC SUBNET (B)   |       |    PRIVATE SUBNET (A)   |       |    PRIVATE SUBNET (B)   |
-|        (10.0.1.0/24)        |       |    (10.0.4.0/24)     |       |      (10.0.2.0/24)      |       |      (10.0.3.0/24)      |
-+-----------------------------+       +----------------------+       +-------------------------+       +-------------------------+
-|     [ Load Balancer ]       |       |  [ Load Balancer ]   |       | [ ECS Service ]         |       | [ ECS Service ]         |
-|             |               |       |          |           |       | [ Odoo Task ]           |       | [ Odoo Task ]           |
-|             +---------------|-------|----------+-----------|------>|      |                  |------>|      |                  |
-|                             |       |                      |       |      | (Reads/Writes)   |       |      | (Reads/Writes)   |
-|       [ NAT Gateway ] <-----|-------|----------------------|-------|------+                  |       |------+                  |
-+-------------|---------------+       +----------------------+       |      ▼                  |       |      ▼                  |
-              |                                                      | [ EFS Mount Target ] <--|-------|-> [ EFS Mount Target ]  |
-              |                                                      |      |                  |       |      |                  |
-              |                                                      |      ▼                  |       |      ▼                  |
-              |                                                      | [ RDS Postgres ] (Pri) -|-------|-> [ RDS Postgres ] (Sec)|
-              |                                                      +-------------------------+       +-------------------------+
-              |                                                                    |
-              └────────────────────────────────────────────────────────────────────┘
-                                     (Outgoing Updates Only)
+      USER (Internet)
+              |
+              ▼
+ [ CloudFront Distribution ] (Global Edge)
+              |
+              ▼
+ [ Internet Gateway ] <---------------------------------------------------------------------- [ VPC: 10.0.0.0/16 ]
+              |                                                                                                |
+              |          ______________________________________________________________________________________|_________________
+              |         |                               |                                |                                 |
+              ▼         ▼                               ▼                                ▼                                 ▼
++-----------------------------+ +-----------------------------+ +------------------------------+ +------------------------------+
+|  PUBLIC SUBNET (public_a)   | |  PUBLIC SUBNET (public_b)   | | PRIVATE SUBNET (private_a)   | | PRIVATE SUBNET (private_b)   |
+|       (10.0.1.0/24)         | |       (10.0.4.0/24)         | |       (10.0.2.0/24)          | |       (10.0.3.0/24)          |
++-----------------------------+ +-----------------------------+ +------------------------------+ +------------------------------+
+|      [ Load Balancer ]      | |      [ Load Balancer ]      | |      [ ECS Service ]         | |      [ ECS Service ]         |
+|             |               | |              |              | |      [ Odoo Task ]           | |      [ Odoo Task ]           |
+|             +---------------|-|--------------+--------------|-|---->       |       ----------|-|---->       |                 |
+|                             | |                             | |            | (Reads/Writes)  | |            | (Reads/Writes)  |
+|       [ NAT Gateway ] <-----|-|-----------------------------|-|------------+-----------------|-|------------+                 |
++-------------|---------------+ +-----------------------------+ |            ▼                 | |            ▼                 |
+              |                                                 |    [ EFS Mount Target ] <----|-|-> [ EFS Mount Target ]       |
+              |                                                 |            |                 | |            |                 |
+              |                                                 |            ▼                 | |            ▼                 |
+              |                                                 |    [ RDS Postgres ] (Pri) ---|-|-> [ RDS Postgres ] (Replica) |
+              |                                                 +------------------------------+ +------------------------------+
+              |                                                              |
+              └──────────────────────────────────────────────────────────────┘
+                                  (Outgoing Traffic Only)
+
+Notes:
+  - [ Load Balancer ] is a single ALB (aws_lb.main) spanning both public subnets for HA.
+  - [ ECS Service ] is a single service whose tasks are scheduled across both private subnets via the ASG.
+  - [ EFS Mount Target ] are two mount targets of one shared EFS file system (aws_efs_file_system.odoo).
+  - [ RDS Postgres ] is a single instance with multi_az=true; AWS manages the standby replica automatically.

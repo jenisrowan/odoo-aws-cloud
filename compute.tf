@@ -30,7 +30,7 @@ EOF
 
 # Autoscale physical EC2 servers
 resource "aws_autoscaling_group" "ecs_asg" {
-  vpc_zone_identifier  = [aws_subnet.private.id, aws_subnet.private2.id]
+  vpc_zone_identifier  = [aws_subnet.private_a.id, aws_subnet.private_b.id]
   min_size             = 1
   max_size             = 4
   desired_capacity     = 1

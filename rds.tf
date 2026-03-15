@@ -1,6 +1,6 @@
 resource "aws_db_subnet_group" "rds" {
   name       = "odoo-db-subnet-group"
-  subnet_ids = [aws_subnet.private.id, aws_subnet.private2.id]
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
 }
 
 resource "aws_db_instance" "postgres" {

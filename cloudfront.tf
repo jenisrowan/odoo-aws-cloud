@@ -24,7 +24,9 @@ resource "aws_cloudfront_distribution" "odoo" {
         forward = "all"
       }
     }
-    min_ttl = 0
+    min_ttl     = 0
+    default_ttl = 0
+    max_ttl     = 0
   }
 
   ordered_cache_behavior {
@@ -39,7 +41,10 @@ resource "aws_cloudfront_distribution" "odoo" {
         forward = "none"
       }
     }
-    min_ttl = 3600
+    # Base odoo core static files will not change often
+    min_ttl     = 3600
+    default_ttl = 86400
+    max_ttl     = 31536000
   }
 
   restrictions {
