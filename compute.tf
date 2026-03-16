@@ -86,6 +86,7 @@ resource "aws_ecs_task_definition" "odoo" {
   # ERP solution with heavy manufacturing, procurement, accounting logic.
   # Using a "light-weight" edition by having 2 tasks per EC2 instance
   # significantly impacts the performance.
+  
   cpu    = "1664" # 2048 - 256 (reserved for OS) - 128 (Buffer)
   memory = "7296" # 8192 - 512 (reserved for OS) - 384 (Buffer)
 

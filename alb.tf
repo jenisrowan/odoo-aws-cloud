@@ -3,7 +3,10 @@ resource "aws_lb" "main" {
   name = "odoo-alb"
 
   load_balancer_type = "application"
-  security_groups    = [aws_security_group.alb_sg.id]
+  security_groups    = [
+    aws_security_group.alb_http_sg.id,
+    aws_security_group.alb_https_sg.id
+  ]
 
   subnets = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 }

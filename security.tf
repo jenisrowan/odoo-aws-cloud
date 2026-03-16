@@ -1,11 +1,11 @@
-# Security group for ALB
-resource "aws_security_group" "alb_sg" {
-  name        = "odoo-alb-sg"
-  description = "Allow HTTP/HTTPS inbound traffic"
+# Users should access Nginx only through CloudFront
+# Direct ALB access is blocked
+# Security group for ALB (HTTP)
+resource "aws_security_group" "alb_http_sg" {
+  name        = "odoo-alb-http-sg"
+  description = "Allow HTTP inbound traffic from CloudFront"
   vpc_id      = aws_vpc.main.id
 
-  # Users should access Nginx only through CloudFront
-  # Direct ALB access is blocked
   ingress {
     description     = "HTTP from CloudFront only"
     from_port       = 80
@@ -13,6 +13,20 @@ resource "aws_security_group" "alb_sg" {
     protocol        = "tcp"
     prefix_list_ids = [data.aws_ec2_managed_prefix_list.cloudfront.id]
   }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Security group for ALB (HTTPS)
+resource "aws_security_group" "alb_https_sg" {
+  name        = "odoo-alb-https-sg"
+  description = "Allow HTTPS inbound traffic from CloudFront"
+  vpc_id      = aws_vpc.main.id
 
   ingress {
     description     = "HTTPS from CloudFront only"
@@ -55,7 +69,10 @@ resource "aws_security_group" "ecs_task_sg" {
     from_port       = 80
     to_port         = 80
     protocol        = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]
+    security_groups = [
+      aws_security_group.alb_http_sg.id,
+      aws_security_group.alb_https_sg.id
+    ]
   }
 
   egress {
