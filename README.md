@@ -21,7 +21,7 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 
 1.  **Clone the repository**:
     ```bash
-    git clone [https://github.com/jenisrowan/odoo-aws-cloud.git](https://github.com/jenisrowan/odoo-aws-cloud.git)
+    git clone https://github.com/jenisrowan/odoo-aws-cloud.git
     cd odoo-aws-cloud
     ```
 
