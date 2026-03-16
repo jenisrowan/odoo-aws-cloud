@@ -3,7 +3,7 @@
     "name": "odoo",
     "image": "${odoo_image_url}",
     "cpu": 1536,
-    "memory": 7168,
+    "memory": 6912,
     "essential": true,
     "environment": [
       {

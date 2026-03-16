@@ -5,8 +5,8 @@ ECS Cluster
            └── Odoo Container (ERP Application)
 
 Resource Allocation (Total: 2 vCPU / 8 GiB)
- ├── Host Reservation: 384 CPU / 896 MiB (OS & Daemon stability)
- └── Odoo Task: 1536 CPU / 7168 MiB (Full instance utilization)
+ ├── Host Reservation: 384 CPU / 1024 MiB (OS & Daemon stability)
+ └── Odoo Task: 1536 CPU / 6912 MiB (Full instance utilization)
 
 Scaling Architecture
  └── Max 4 EC2 Instances = Max 4 Odoo Tasks

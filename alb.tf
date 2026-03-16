@@ -38,7 +38,31 @@ resource "aws_lb_listener" "http" {
   protocol = "HTTP"
 
   default_action {
-    type = "forward"
+    type = "fixed-response"
+
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Access Denied - Please use the official CloudFront URL"
+      status_code  = "403"
+    }
+  }
+}
+
+resource "aws_lb_listener_rule" "allow_cloudfront_secret" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
     target_group_arn = aws_lb_target_group.odoo.arn
+  }
+
+  # Forward traffic only when X-Odoo-Origin-Verify header value matches the
+  # value from cloudfront
+  condition {
+    http_header {
+      http_header_name   = "X-Odoo-Origin-Verify"
+      values             = [random_password.cf_secret.result]
+    }
   }
 }

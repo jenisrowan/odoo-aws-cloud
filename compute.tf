@@ -88,7 +88,7 @@ resource "aws_ecs_task_definition" "odoo" {
   # significantly impacts the performance.
   
   cpu    = "1664" # 2048 - 256 (reserved for OS) - 128 (Buffer)
-  memory = "7296" # 8192 - 512 (reserved for OS) - 384 (Buffer)
+  memory = "7040" # 8192 - 512 (reserved for OS) - 640 (Buffer)
 
   container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
     db_host            = aws_db_instance.postgres.address
@@ -108,7 +108,13 @@ resource "aws_ecs_task_definition" "odoo" {
     name = "odoo-efs"
 
     efs_volume_configuration {
-      file_system_id = aws_efs_file_system.odoo.id
+      file_system_id     = aws_efs_file_system.odoo.id
+      transit_encryption = "ENABLED" # Required when using access points
+      
+      authorization_config {
+        access_point_id = aws_efs_access_point.odoo.id
+        iam             = "DISABLED" 
+      }
     }
   }
 }

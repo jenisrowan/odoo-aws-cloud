@@ -34,3 +34,23 @@ resource "aws_efs_mount_target" "efs_mount2" {
   subnet_id       = aws_subnet.private_b.id
   security_groups = [aws_security_group.efs_sg.id]
 }
+
+resource "aws_efs_access_point" "odoo" {
+  file_system_id = aws_efs_file_system.odoo.id
+
+  # Forces all traffic through this access point to act as the Odoo user
+  posix_user {
+    uid = 101 # Default UID for Odoo container
+    gid = 101 # Default GID for Odoo container
+  }
+
+  # Automatically creates a folder with the right permissions if it doesn't exist
+  root_directory {
+    path = "/odoo-data"
+    creation_info {
+      owner_uid   = 101
+      owner_gid   = 101
+      permissions = "0755"
+    }
+  }
+}

@@ -1,6 +1,7 @@
 # Users should access Nginx only through CloudFront
 # Direct ALB access is blocked
 # Security group for ALB (HTTP)
+# Two security groups because AWS only allows 60 rules per security group
 resource "aws_security_group" "alb_http_sg" {
   name        = "odoo-alb-http-sg"
   description = "Allow HTTP inbound traffic from CloudFront"
@@ -113,7 +114,7 @@ resource "aws_security_group" "efs_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description     = "NFS from ECS instances"
+    description     = "NFS from ECS tasks"
     from_port       = 2049
     to_port         = 2049
     protocol        = "tcp"
