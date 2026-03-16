@@ -54,6 +54,7 @@ resource "aws_route_table_association" "public_b" {
 }
 
 # --- REGIONAL NAT GATEWAY ---
+# We will use the new AWS offering -> Regional NAT Gateway
 resource "aws_nat_gateway" "main" {
   availability_mode = "regional"
   vpc_id            = aws_vpc.main.id

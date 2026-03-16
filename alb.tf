@@ -8,6 +8,8 @@ resource "aws_lb" "main" {
   subnets = [aws_subnet.public_a.id, aws_subnet.public_b.id]
 }
 
+# We don't want sticky session here - Sticky session feels like a temperory fix than a permanent solution
+# We will use a more robust EFS for session storage (in the future we might need to change it to ElastiCache)
 resource "aws_lb_target_group" "odoo" {
   port        = 80
   protocol    = "HTTP"
@@ -15,7 +17,7 @@ resource "aws_lb_target_group" "odoo" {
   target_type = "ip"
   
   # Odoo's root path (/) redirects to /web/login (302), which ALB would treat
-  # as unhealthy. /web/health is Odoo's built-in endpoint that always returns 200.
+  # as unhealthy. Odoo's /web/health built-in endpoint that always returns 200.
   health_check {
     path                = "/web/health"
     protocol            = "HTTP"

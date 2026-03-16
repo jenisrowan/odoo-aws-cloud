@@ -28,7 +28,8 @@ resource "aws_security_group" "alb_sg" {
   }
 }
 
-
+# Since we used "awsvpc" we don't want ingress traffic for our EC2 hosts
+# Traffic goes straight to the ENIs of the tasks
 resource "aws_security_group" "ecs_node_sg" {
   name        = "odoo-ecs-node-sg"
   description = "Security group for underlying EC2 hosts"
@@ -64,10 +65,10 @@ resource "aws_security_group" "ecs_task_sg" {
 }
 
 
-# Expose the default postgres port to ECS instances
+# Expose the default RDS postgres port to ECS Task ENI
 resource "aws_security_group" "rds_sg" {
   name        = "odoo-rds-sg"
-  description = "Allow Postgres traffic from ECS"
+  description = "Allow Postgres traffic from ECS tasks"
   vpc_id      = aws_vpc.main.id
 
   ingress {
@@ -86,10 +87,10 @@ resource "aws_security_group" "rds_sg" {
   }
 }
 
-# Allow NFS from ECS instances
+# Allow NFS from ECS Task ENI
 resource "aws_security_group" "efs_sg" {
   name        = "odoo-efs-sg"
-  description = "Allow NFS traffic from ECS"
+  description = "Allow NFS traffic from ECS tasks"
   vpc_id      = aws_vpc.main.id
 
   ingress {

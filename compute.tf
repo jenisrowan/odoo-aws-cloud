@@ -25,8 +25,11 @@ resource "aws_launch_template" "ecs" {
   user_data = base64encode(<<EOF
 #!/bin/bash
 echo ECS_CLUSTER=${aws_ecs_cluster.odoo.name} >> /etc/ecs/ecs.config
+echo ECS_RESERVED_CPU=256 >> /etc/ecs/ecs.config
+echo ECS_RESERVED_MEMORY=512 >> /etc/ecs/ecs.config
 EOF
   )
+# We reserve some memory and CPU for the OS and Docker daemon
 }
 
 # Autoscale physical EC2 servers
@@ -79,8 +82,12 @@ resource "aws_ecs_task_definition" "odoo" {
   
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
-  cpu    = "1024"
-  memory = "3584"
+  # We are opting for 1 task per EC2 instance because Odoo is a powerful
+  # ERP solution with heavy manufacturing, procurement, accounting logic.
+  # Using a "light-weight" edition by having 2 tasks per EC2 instance
+  # significantly impacts the performance.
+  cpu    = "1792"
+  memory = "7680"
 
   container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
     db_host            = aws_db_instance.postgres.address
@@ -139,7 +146,7 @@ resource "aws_appautoscaling_target" "ecs_target" {
   scalable_dimension = "ecs:service:DesiredCount"
 
   min_capacity = 1
-  max_capacity = 8
+  max_capacity = 4
 }
 
 resource "aws_appautoscaling_policy" "ecs_cpu" {
