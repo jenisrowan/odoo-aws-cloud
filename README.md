@@ -52,6 +52,12 @@ To reduce configuration complexity and minimize costs, this project utilizes a *
 - **Data Transfer**: This design is especially cost-effective if certain AZs have no active resources, as it eliminates NAT-related idle costs while maintaining outbound internet access for private workloads.
 - **Smarter Traffic**: Zero multi-AZ transfer charges for regional NAT gateways, as AWS will pick the NAT in the current AZ for outbound traffic.
 
+### EFS Storage Tiering
+To further optimize long-term storage costs for Odoo's filestore, a triple-tier lifecycle policy is implemented:
+- **Infrequent Access (IA)**: Files not accessed for **30 days** automatically move to the IA tier (significantly cheaper storage).
+- **Archive Tier**: Files not accessed for **90 days** move to EFS Archive storage for maximum cost savings.
+- **Intelligent Recovery**: Any access to a file in IA or Archive immediately transitions it back to **Primary Storage** (AFTER_1_ACCESS) to ensure low-latency performance and cut down on access cost for active data.
+
 ## Security
 
 - **Database**: RDS is situated in private subnets and only accepts traffic from ECS tasks on port 5432.

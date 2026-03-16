@@ -86,8 +86,8 @@ resource "aws_ecs_task_definition" "odoo" {
   # ERP solution with heavy manufacturing, procurement, accounting logic.
   # Using a "light-weight" edition by having 2 tasks per EC2 instance
   # significantly impacts the performance.
-  cpu    = "1792"
-  memory = "7680"
+  cpu    = "1664" # 2048 - 256 (reserved for OS) - 128 (Buffer)
+  memory = "7296" # 8192 - 512 (reserved for OS) - 384 (Buffer)
 
   container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
     db_host            = aws_db_instance.postgres.address
@@ -119,7 +119,7 @@ resource "aws_ecs_service" "odoo" {
   task_definition = aws_ecs_task_definition.odoo.arn
   desired_count   = 1
 
-  health_check_grace_period_seconds = 120
+  health_check_grace_period_seconds = 90
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.odoo.name

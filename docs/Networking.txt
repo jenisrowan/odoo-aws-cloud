@@ -1,9 +1,11 @@
-VPC
-├── Public Subnets
-│   ├── CloudFront origin (ALB)
-│   └── Application Load Balancer
+VPC (10.0.0.0/16)
+├── Public Subnets (AZ-a, AZ-b)
+│   ├── Internet Gateway
+│   ├── Application Load Balancer (CloudFront Origin)
+│   └── Regional NAT Gateway (Egress for Private Subnets)
 │
-└── Private Subnets
-    ├── ECS EC2 instances
-    ├── RDS PostgreSQL
-    └── EFS
+└── Private Subnets (AZ-a, AZ-b)
+    ├── ECS EC2 instances (Container Hosts)
+    ├── ECS Task ENIs (Actual Odoo/Nginx instances)
+    ├── RDS PostgreSQL (Database)
+    └── EFS (Shared Storage)

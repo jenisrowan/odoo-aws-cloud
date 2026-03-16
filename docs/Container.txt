@@ -1,10 +1,12 @@
 ECS Cluster
- ├── EC2 Instance
- │    ├── Nginx container
- │    └── Odoo container
+ └── EC2 Instance (m7i-flex.large)
+      └── ECS Task (1:1 Ratio with Instance)
+           ├── Nginx Container (Reverse Proxy)
+           └── Odoo Container (ERP Application)
 
-Task
- ├── nginx
- └── odoo:19
+Resource Allocation (Total: 2 vCPU / 8 GiB)
+ ├── Host Reservation: 384 CPU / 896 MiB (OS & Daemon stability)
+ └── Odoo Task: 1536 CPU / 7168 MiB (Full instance utilization)
 
-Use Nginx only as an Reverse proxy and websocket forwarding (chat)
+Scaling Architecture
+ └── Max 4 EC2 Instances = Max 4 Odoo Tasks

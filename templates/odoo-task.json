@@ -2,8 +2,8 @@
   {
     "name": "odoo",
     "image": "${odoo_image_url}",
-    "cpu": 1664,
-    "memory": 7552,
+    "cpu": 1536,
+    "memory": 7168,
     "essential": true,
     "environment": [
       {
