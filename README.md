@@ -21,7 +21,7 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/jenisrowan/odoo-aws-cloud.git
+    git clone [https://github.com/jenisrowan/odoo-aws-cloud.git](https://github.com/jenisrowan/odoo-aws-cloud.git)
     cd odoo-aws-cloud
     ```
 
@@ -30,12 +30,12 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
     terraform init
     ```
 
-3.  **Configure Variables**:
-    Create a `terraform.tfvars` file or set environment variables for the following:
-    - `db_password`: RDS PostgreSQL admin password.
-    - `admin_passwd`: Odoo Master Password (passed securely via environment variables).
-    - `odoo_image_url`: Your custom Odoo image in ECR.
-    - `nginx_image_url`: Your custom Nginx image in ECR.
+3.  **Setup AWS Secrets**:
+    Before deploying, you must manually create a secret in AWS Secrets Manager to store the Odoo Admin password. *(Note: The PostgreSQL database password is automatically generated and managed by AWS RDS).*
+    - Go to AWS Secrets Manager -> Store a new secret.
+    - Choose **Other type of secret**.
+    - Add a Key/Value pair: Key = `password`, Value = `[Your_Secure_Password]`.
+    - Name the secret: `odoo/admin/password`.
 
 4.  **Deploy**:
     ```bash
@@ -50,12 +50,14 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 To reduce configuration complexity and minimize costs, this project utilizes a **Regional NAT Gateway** pattern:
 - **Cost Savings**: By using a single Regional NAT Gateway shared across private subnets, we avoid the fixed hourly charges of multiple NAT Gateways in different Availability Zones.
 - **Data Transfer**: This design is especially cost-effective if certain AZs have no active resources, as it eliminates NAT-related idle costs while maintaining outbound internet access for private workloads.
-- **Smarter Traffic**: zero multi-AZ transfer charges for regional NAT gateways, as AWS will pick the NAT in the current AZ for oubound traffic.
+- **Smarter Traffic**: Zero multi-AZ transfer charges for regional NAT gateways, as AWS will pick the NAT in the current AZ for outbound traffic.
 
 ## Security
 
 - **Database**: RDS is situated in private subnets and only accepts traffic from ECS tasks on port 5432.
-- **Secrets Management**: Sensitive data like `db_password` and `admin_passwd` are handled as sensitive Terraform variables and passed to containers via ECS environment variables, avoiding plain-text configuration files.
+- **Zero-Knowledge Secrets Management**: 
+  - **RDS Managed Passwords**: The master database password is automatically generated, encrypted, and managed natively by AWS. Plain-text credentials are **never** exposed or stored in the Terraform `tfstate` file. 
+  - **Direct Secret Injection**: ECS tasks use IAM Task Execution Roles to fetch credentials directly from AWS Secrets Manager at runtime. Passwords are never passed as plain-text environment variables, protecting them from exposure in the AWS Console or logs. 
 - **Encryption**: EFS is encrypted at rest, and CloudFront enforces HTTPS.
 
 ## Outputs

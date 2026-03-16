@@ -45,3 +45,23 @@ resource "aws_iam_instance_profile" "ecs_instance_profile" {
   name = "odoo-ecs-instance-profile"
   role = aws_iam_role.ecs_instance_role.name
 }
+
+# Allow ECS to read the passwords from Secrets Manager and RDS
+resource "aws_iam_role_policy" "ecs_secrets_policy" {
+  name = "odoo-ecs-secrets-policy"
+  role = aws_iam_role.ecs_task_execution_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["secretsmanager:GetSecretValue"]
+        Effect   = "Allow"
+        Resource = [
+          aws_db_instance.postgres.master_user_secret[0].secret_arn,
+          data.aws_secretsmanager_secret.odoo_admin_passwd.arn
+        ]
+      }
+    ]
+  })
+}

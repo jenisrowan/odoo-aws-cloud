@@ -2,11 +2,6 @@ variable "region" {
   default = "ap-south-1"
 }
 
-variable "db_password" {
-  description = "The database admin password"
-  sensitive   = true
-}
-
 variable "nginx_image_url" {
   description = "The full ECR URL and tag for the custom Nginx image"
   type        = string

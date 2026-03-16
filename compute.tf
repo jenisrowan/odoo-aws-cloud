@@ -76,22 +76,24 @@ resource "aws_ecs_task_definition" "odoo" {
   family                   = "odoo"
   requires_compatibilities = ["EC2"]
   network_mode             = "awsvpc"
-  # Even though m7i-flex.large has max of 3 ENI m7i-flex.large
-  # has only 8gb of ram; using more than 2 containers of odoo 19 is going to slow the instance down.
-  # We will use network_mode as awsvpc instead of bridge
-  # With awsvpc we can connect the alb directly to the container bypassing the EC2
-
+  
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
 
   cpu    = "1024"
   memory = "3584"
 
   container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
-    db_host         = aws_db_instance.postgres.address
-    db_password     = var.db_password
-    nginx_image_url = var.nginx_image_url
-    odoo_image_url  = var.odoo_image_url
-    aws_region      = var.region
+    db_host            = aws_db_instance.postgres.address
+    
+    # We pass the ARN
+    admin_password_arn = data.aws_secretsmanager_secret.odoo_admin_passwd.arn
+    
+    # Grab the ARN of the auto-generated secret directly from RDS
+    db_password_arn    = aws_db_instance.postgres.master_user_secret[0].secret_arn
+
+    nginx_image_url    = var.nginx_image_url
+    odoo_image_url     = var.odoo_image_url
+    aws_region         = var.region
   })
 
   volume {

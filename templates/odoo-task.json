@@ -13,10 +13,16 @@
       {
         "name": "USER",
         "value": "odoo"
-      },
+      }
+    ],
+    "secrets": [
       {
         "name": "PASSWORD",
-        "value": "${db_password}"
+        "valueFrom": "${db_password_arn}:password::"
+      },
+      {
+        "name": "ODOO_ADMIN_PASSWD",
+        "valueFrom": "${admin_password_arn}:password::"
       }
     ],
     "mountPoints": [
