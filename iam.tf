@@ -65,3 +65,30 @@ resource "aws_iam_role_policy" "ecs_secrets_policy" {
     ]
   })
 }
+
+# ECS Task Role - permissions for the containers themselves
+resource "aws_iam_role" "ecs_task_role" {
+  name               = "odoo-ecs-task-role"
+  assume_role_policy = data.aws_iam_policy_document.ecs_task_trust.json
+}
+
+# Allow the task to mount and write to EFS
+resource "aws_iam_role_policy" "ecs_efs_policy" {
+  name = "odoo-ecs-efs-policy"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = [
+          "elasticfilesystem:ClientMount",
+          "elasticfilesystem:ClientWrite",
+          "elasticfilesystem:ClientRootAccess"
+        ]
+        Effect   = "Allow"
+        Resource = aws_efs_file_system.odoo.arn
+      }
+    ]
+  })
+}

@@ -81,6 +81,7 @@ resource "aws_ecs_task_definition" "odoo" {
   network_mode             = "awsvpc"
   
   execution_role_arn       = aws_iam_role.ecs_task_execution_role.arn
+  task_role_arn            = aws_iam_role.ecs_task_role.arn
 
   # We are opting for 1 task per EC2 instance because Odoo is a powerful
   # ERP solution with heavy manufacturing, procurement, accounting logic.
@@ -113,7 +114,7 @@ resource "aws_ecs_task_definition" "odoo" {
       
       authorization_config {
         access_point_id = aws_efs_access_point.odoo.id
-        iam             = "DISABLED" 
+        iam             = "ENABLED"
       }
     }
   }
