@@ -92,3 +92,25 @@ resource "aws_iam_role_policy" "ecs_efs_policy" {
     ]
   })
 }
+
+# Allow ECS Exec (shell access)
+resource "aws_iam_role_policy" "ecs_task_exec_policy" {
+  name = "odoo-ecs-task-exec-policy"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ssmmessages:CreateControlChannel",
+          "ssmmessages:CreateDataChannel",
+          "ssmmessages:OpenControlChannel",
+          "ssmmessages:OpenDataChannel"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      }
+    ]
+  })
+}

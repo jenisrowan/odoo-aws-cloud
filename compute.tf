@@ -128,6 +128,7 @@ resource "aws_ecs_service" "odoo" {
   desired_count   = 1
 
   health_check_grace_period_seconds = 90
+  enable_execute_command = true
 
   capacity_provider_strategy {
     capacity_provider = aws_ecs_capacity_provider.odoo.name
