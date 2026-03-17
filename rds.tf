@@ -22,13 +22,15 @@ resource "aws_db_instance" "postgres" {
   skip_final_snapshot    = true
 }
 
+# postgresql.conf equivalent
 resource "aws_db_parameter_group" "postgres15" {
   name   = "odoo-postgres15-params"
   family = "postgres15"
 
   # Increase connections to handle 4 scaled Odoo tasks on micro RAM
   parameter {
-    name  = "max_connections"
-    value = "120"
+    name         = "max_connections"
+    value        = "120"
+    apply_method = "pending-reboot"
   }
 }
