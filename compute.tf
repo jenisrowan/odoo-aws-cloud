@@ -146,6 +146,11 @@ resource "aws_ecs_service" "odoo" {
     container_name   = "nginx"
     container_port   = 80
   }
+
+  # Terraform should not override autoscaling
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
 }
 
 # 5. Service Auto-Scaling (Task Count)
