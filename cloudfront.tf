@@ -36,6 +36,7 @@ resource "aws_cloudfront_distribution" "odoo" {
     cached_methods         = ["GET", "HEAD"]
     forwarded_values {
       query_string = true
+      headers      = ["Host"]
       cookies {
         forward = "all"
       }
@@ -43,6 +44,26 @@ resource "aws_cloudfront_distribution" "odoo" {
     min_ttl     = 0
     default_ttl = 0
     max_ttl     = 0
+  }
+
+  # Caching behavior for dynamically generated Odoo assets (CSS/JS bundles)
+  ordered_cache_behavior {
+    path_pattern           = "/web/assets/*"
+    target_origin_id       = "alb-origin"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+    forwarded_values {
+      query_string = true
+      headers      = ["Host"]
+      cookies {
+        forward = "none"
+      }
+    }
+    # These change whenever the DB content changes, but should be cached for speed
+    min_ttl     = 0
+    default_ttl = 3600
+    max_ttl     = 86400
   }
 
   # Caching behaviour for core odoo static assets
@@ -54,6 +75,7 @@ resource "aws_cloudfront_distribution" "odoo" {
     cached_methods         = ["GET", "HEAD"]
     forwarded_values {
       query_string = false
+      headers      = ["Host"]
       cookies {
         forward = "none"
       }

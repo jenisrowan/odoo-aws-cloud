@@ -18,5 +18,17 @@ resource "aws_db_instance" "postgres" {
 
   db_subnet_group_name   = aws_db_subnet_group.rds.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
+  parameter_group_name    = aws_db_parameter_group.postgres15.name
   skip_final_snapshot    = true
+}
+
+resource "aws_db_parameter_group" "postgres15" {
+  name   = "odoo-postgres15-params"
+  family = "postgres15"
+
+  # Increase connections to handle 4 scaled Odoo tasks on micro RAM
+  parameter {
+    name  = "max_connections"
+    value = "120"
+  }
 }
