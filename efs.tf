@@ -1,23 +1,29 @@
 resource "aws_efs_file_system" "odoo" {
   creation_token   = "odoo-efs"
   performance_mode = "generalPurpose"
-  throughput_mode  = "elastic"
-  # Elastic is more expensive but most users will not touch 95% of the
-  # Files after 90 days, archive storage is much cheaper in the long run.
-  # Bursting doesn't give much saving unless we access files frequently and have a period of dormancy for the odoo usage.
 
-  # Intelligent Tiering: move to IA after 30 days
+  # Why Elastic? Small Odoo systems (1-10GB) would be throttled 
+  # to ~50-500 KiB/s in Bursting mode (unless we have burst credits accumulated),
+  # making the UI unusable.
+  # Elastic provides on-demand performance regardless of size.
+  # Since we use Archive for old files, the per-GB transfer cost 
+  # is only paid on active files, keeping costs predictable.
+  # 95% of the files endup in Archive storage making saving from
+  # Bursting redundant. NOTE: Archive is not available in Bursting mode
+  throughput_mode = "elastic"
+
+  # Move to Infrequent Access after 30 days
   lifecycle_policy {
     transition_to_ia = "AFTER_30_DAYS"
   }
 
-  # Archive storage: move to Archive if not accessed for 90 days
-  # We can use Archive storage class because we are using regional EFS
+  # Archive storage: Move to Archive after 90 days.
+  # Saves ~95% on storage costs for old attachments/logs.
   lifecycle_policy {
     transition_to_archive = "AFTER_90_DAYS"
   }
 
-  # Move back to Standard storage immediately on first access
+  # Move back to Standard immediately on access
   lifecycle_policy {
     transition_to_primary_storage_class = "AFTER_1_ACCESS"
   }
@@ -40,6 +46,7 @@ resource "aws_efs_access_point" "odoo" {
 
 
   # Automatically creates a folder with the right permissions if it doesn't exist
+  # Odoo is the uid 101
   root_directory {
     path = "/odoo-data"
     creation_info {

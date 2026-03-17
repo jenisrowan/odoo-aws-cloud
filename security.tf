@@ -66,10 +66,10 @@ resource "aws_security_group" "ecs_task_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description     = "Allow Nginx HTTP from ALB"
-    from_port       = 80
-    to_port         = 80
-    protocol        = "tcp"
+    description = "Allow Nginx HTTP from ALB"
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
     security_groups = [
       aws_security_group.alb_http_sg.id,
       aws_security_group.alb_https_sg.id
@@ -114,10 +114,10 @@ resource "aws_security_group" "efs_sg" {
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description     = "NFS from ECS tasks"
-    from_port       = 2049
-    to_port         = 2049
-    protocol        = "tcp"
+    description = "NFS from ECS tasks"
+    from_port   = 2049
+    to_port     = 2049
+    protocol    = "tcp"
     security_groups = [
       aws_security_group.ecs_task_sg.id,
       aws_security_group.ecs_node_sg.id

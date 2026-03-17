@@ -8,15 +8,15 @@ resource "aws_db_instance" "postgres" {
   engine_version = "15"
   instance_class = "db.t4g.micro"
 
-  multi_az = true
+  multi_az          = true
   allocated_storage = 20
 
   username = "odoo"
-  
+
   # Let AWS autogenerate
   manage_master_user_password = true
 
   db_subnet_group_name   = aws_db_subnet_group.rds.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  skip_final_snapshot = true
+  skip_final_snapshot    = true
 }

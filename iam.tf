@@ -55,8 +55,8 @@ resource "aws_iam_role_policy" "ecs_secrets_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action   = ["secretsmanager:GetSecretValue"]
-        Effect   = "Allow"
+        Action = ["secretsmanager:GetSecretValue"]
+        Effect = "Allow"
         Resource = [
           aws_db_instance.postgres.master_user_secret[0].secret_arn,
           data.aws_secretsmanager_secret.odoo_admin_passwd.arn
@@ -81,7 +81,7 @@ resource "aws_iam_role_policy" "ecs_efs_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action   = [
+        Action = [
           "elasticfilesystem:ClientMount",
           "elasticfilesystem:ClientWrite",
           "elasticfilesystem:ClientRootAccess"

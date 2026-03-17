@@ -3,7 +3,7 @@ resource "aws_lb" "main" {
   name = "odoo-alb"
 
   load_balancer_type = "application"
-  security_groups    = [
+  security_groups = [
     aws_security_group.alb_http_sg.id,
     aws_security_group.alb_https_sg.id
   ]
@@ -18,7 +18,7 @@ resource "aws_lb_target_group" "odoo" {
   protocol    = "HTTP"
   vpc_id      = aws_vpc.main.id
   target_type = "ip"
-  
+
   # Odoo's root path (/) redirects to /web/login (302), which ALB would treat
   # as unhealthy. Odoo's /web/health built-in endpoint that always returns 200.
   health_check {
@@ -34,8 +34,8 @@ resource "aws_lb_target_group" "odoo" {
 
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
-  port = 80
-  protocol = "HTTP"
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
     type = "fixed-response"
@@ -61,8 +61,8 @@ resource "aws_lb_listener_rule" "allow_cloudfront_secret" {
   # value from cloudfront
   condition {
     http_header {
-      http_header_name   = "X-Odoo-Origin-Verify"
-      values             = [random_password.cf_secret.result]
+      http_header_name = "X-Odoo-Origin-Verify"
+      values           = [random_password.cf_secret.result]
     }
   }
 }
