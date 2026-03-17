@@ -118,7 +118,10 @@ resource "aws_security_group" "efs_sg" {
     from_port       = 2049
     to_port         = 2049
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_task_sg.id]
+    security_groups = [
+      aws_security_group.ecs_task_sg.id,
+      aws_security_group.ecs_node_sg.id
+    ]
   }
 
   egress {

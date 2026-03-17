@@ -38,11 +38,6 @@ resource "aws_efs_mount_target" "efs_mount2" {
 resource "aws_efs_access_point" "odoo" {
   file_system_id = aws_efs_file_system.odoo.id
 
-  # Forces all traffic through this access point to act as the Odoo user
-  posix_user {
-    uid = 101 # Default UID for Odoo container
-    gid = 101 # Default GID for Odoo container
-  }
 
   # Automatically creates a folder with the right permissions if it doesn't exist
   root_directory {
