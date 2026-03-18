@@ -151,6 +151,7 @@ resource "aws_ecs_service" "odoo" {
   task_definition = aws_ecs_task_definition.odoo.arn
   desired_count   = 1
 
+  depends_on                        = [aws_ecs_service.pgbouncer]
   health_check_grace_period_seconds = 90
   enable_execute_command            = true
 
