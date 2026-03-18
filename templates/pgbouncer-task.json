@@ -1,7 +1,7 @@
 [
   {
     "name": "pgbouncer",
-    "image": "bitnami/pgbouncer:1.25.1",
+    "image": "edoburu/pgbouncer:v1.25.1-p0",
     "cpu": 1280,
     "memory": 512,
     "essential": true,
