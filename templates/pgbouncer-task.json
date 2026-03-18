@@ -1,0 +1,81 @@
+[
+  {
+    "name": "pgbouncer",
+    "image": "bitnami/pgbouncer:1.25.1",
+    "cpu": 1280,
+    "memory": 512,
+    "essential": true,
+    "environment": [
+      {
+        "name": "PGBOUNCER_DATABASE",
+        "value": "*"
+      },
+      {
+        "name": "PGBOUNCER_PORT",
+        "value": "6432"
+      },
+      {
+        "name": "POSTGRESQL_HOST",
+        "value": "${db_host}"
+      },
+      {
+        "name": "POSTGRESQL_PORT",
+        "value": "5432"
+      },
+      {
+        "name": "POSTGRESQL_USERNAME",
+        "value": "odoo"
+      },
+      {
+        "name": "PGBOUNCER_POOL_MODE",
+        "value": "transaction"
+      },
+      {
+        "name": "PGBOUNCER_MAX_CLIENT_CONN",
+        "value": "1000"
+      },
+      {
+        "name": "PGBOUNCER_DEFAULT_POOL_SIZE",
+        "value": "75"
+      },
+      {
+        "name": "PGBOUNCER_MAX_DB_CONNECTIONS",
+        "value": "80"
+      },
+      {
+        "name": "PGBOUNCER_SERVER_RESET_QUERY",
+        "value": "DISCARD ALL"
+      },
+      {
+        "name": "PGBOUNCER_SET_QUERY_WAIT_TIMEOUT",
+        "value": "120"
+      },
+      {
+        "name": "PGBOUNCER_AUTH_TYPE",
+        "value": "scram-sha-256"
+      }
+    ],
+    "secrets": [
+      {
+        "name": "POSTGRESQL_PASSWORD",
+        "valueFrom": "${db_password_arn}:password::"
+      }
+    ],
+    "portMappings": [
+      {
+        "name": "pgbouncer",
+        "containerPort": 6432,
+        "hostPort": 6432,
+        "protocol": "tcp"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/ecs/odoo",
+        "awslogs-region": "${aws_region}",
+        "awslogs-stream-prefix": "pgbouncer"
+      }
+    }
+  }
+]

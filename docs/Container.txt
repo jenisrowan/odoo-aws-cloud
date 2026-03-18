@@ -1,12 +1,17 @@
 ECS Cluster
- └── EC2 Instance (m7i-flex.large)
+ ├── Odoo Pool (m7i-flex.large)
+ │    └── ECS Task (1:1 Ratio with Instance)
+ │         ├── Nginx Container (Reverse Proxy)
+ │         └── Odoo Container (ERP Application)
+ └── PgBouncer Pool (t3.micro - HA x2)
       └── ECS Task (1:1 Ratio with Instance)
-           ├── Nginx Container (Reverse Proxy)
-           └── Odoo Container (ERP Application)
+           └── PgBouncer Container (bitnami/pgbouncer)
 
-Resource Allocation (Total: 2 vCPU / 8 GiB)
- ├── Host Reservation: 384 CPU / 1024 MiB (OS & Daemon stability)
- └── Odoo Task: 1536 CPU / 6912 MiB (Full instance utilization)
+Resource Allocation (Odoo Task: 1.6 vCPU / 7 GiB | PgBouncer: 1.25 vCPU / 0.5 GiB)
+ ├── Host Reservation: 256 CPU / 512 MiB (OS & Daemon stability)
+ ├── Odoo Task: 1664 CPU / 7040 MiB (Full instance utilization)
+ └── PgBouncer Task: 1280 CPU / 512 MiB (Dedicated micro pool)
 
 Scaling Architecture
- └── Max 4 EC2 Instances = Max 4 Odoo Tasks
+ ├── Max 4 Odoo Instances = Max 4 ERP Tasks
+ └── Locked 2 PgBouncer Instances = High Availability Pooling

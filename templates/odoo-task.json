@@ -8,7 +8,11 @@
     "environment": [
       {
         "name": "HOST",
-        "value": "${db_host}"
+        "value": "pgbouncer.odoo.local"
+      },
+      {
+        "name": "PORT",
+        "value": "6432"
       },
       {
         "name": "USER",

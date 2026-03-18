@@ -1,36 +1,35 @@
        USER (Internet)
               |
               ▼
- [ CloudFront Distribution ] (Global Edge)
+   [ CloudFront Distribution ] (Global Edge)
               |
               ▼
  [ Internet Gateway ] <---------------------------------------------------------------------- [ VPC: 10.0.0.0/16 ]
-              |                                                                                                |
-              |          ______________________________________________________________________________________|_________________
+              |                                                                                               |
+              |          _____________________________________________________________________________________|___________________
               |         |                               |                                |                                 |
               ▼         ▼                               ▼                                ▼                                 ▼
-+-----------------------------+ +-----------------------------+ +------------------------------+ +------------------------------+
-|  PUBLIC SUBNET (public_a)   | |  PUBLIC SUBNET (public_b)   | | PRIVATE SUBNET (private_a)   | | PRIVATE SUBNET (private_b)   |
-|       (10.0.1.0/24)         | |       (10.0.4.0/24)         | |       (10.0.2.0/24)          | |       (10.0.3.0/24)          |
-+-----------------------------+ +-----------------------------+ +------------------------------+ +------------------------------+
-|      [ Load Balancer ]      | |      [ Load Balancer ]      | |      [ ECS Service ]         | |      [ ECS Service ]         |
-|             |               | |              |              | |      [ Odoo Task ]           | |      [ Odoo Task ]           |
-|             +---------------|-|--------------+--------------|-|---->       |       ----------|-|---->       |                 |
-|                             | |                             | |            | (Reads/Writes)  | |            | (Reads/Writes)  |
-|   [ Regional NAT GW ] <-----|-|-----[ Regional NAT GW ] <---|-|------------+-----------------|-|------------+                 |
-+-------------|---------------+ +--------------|--------------+ |            ▼                 | |            ▼                 |
-              |                                |                |    [ EFS Mount Target ] <----|-|-> [ EFS Mount Target ]       |
-              |                                |                |            |                 | |            |                 |
-              |                                |                |            ▼                 | |            ▼                 |
-              |                                |                |    [ RDS Postgres ] (Pri) ---|-|-> [ RDS Postgres ] (Replica) |
-              |                                |                +------------------------------+ +------------------------------+
-              |                                |                               |
++-----------------------------+ +-----------------------------+ +--------------------------------+ +--------------------------------+
+|  PUBLIC SUBNET (public_a)   | |  PUBLIC SUBNET (public_b)   | | PRIVATE SUBNET (private_a)     | | PRIVATE SUBNET (private_b)     |
+|       (10.0.1.0/24)         | |       (10.0.4.0/24)         | |       (10.0.2.0/24)            | |       (10.0.3.0/24)            |
++-----------------------------+ +-----------------------------+ +--------------------------------+ +--------------------------------+
+|      [ Load Balancer ]      | |      [ Load Balancer ]      | |      [ Odoo Service ]          | |      [ Odoo Service ]          |
+|             |               | |              |              | |      (Nginx + Odoo)            | |      (Nginx + Odoo)            |
+|             +---------------|-|--------------+--------------|-|---->  /          \   ----------|-|---->  /          \             |
+|                             | |                             | |      ▼            ▼            | |      ▼            ▼            |
+|                             | |                             | | [ EFS Target ] [ PgBouncer ] <-|-|-> [ EFS Target ] [ PgBouncer ] |
+|                             | |                             | |      | (File IO)  | (Pooling)  | |      | (File IO)  | (Pooling)  |
+|   [ Regional NAT GW ] <-----|-|-----[ Regional NAT GW ] <---|-|------|------------+------------|-|------|------------+            |
++-------------|---------------+ +--------------|--------------+ |                   ▼            | |                   ▼            |
+              |                                |                |    [ RDS Postgres ] (Pri) -----|-|-> [ RDS Postgres ] (Replica)   |
+              |                                |                +--------------------------------+ +--------------------------------+
               └────────────────────────────────┴───────────────────────────────┘
                                   (Outgoing Traffic Only)
 
 Notes:
   - [ Load Balancer ] is a single ALB (aws_lb.main) spanning both public subnets for HA.
-  - [ Regional NAT GW ] is a single logical resource in Automatic Mode that AWS scales dynamically across active AZs. Saves money by eliminating cross-AZ data transfer fees, and automatically cuts hourly compute costs by retracting from specific AZs when no active workloads are running there.
-  - [ ECS Service ] is a single service whose tasks are scheduled across both private subnets via the ASG.
+  - [ Regional NAT GW ] is a single logical resource in Automatic Mode that AWS scales dynamically.
+  - [ Odoo Service ] Odoo connects to EFS Mounting target for file storage and PgBouncer for database pooling.
+  - [ PgBouncer HA ] It uses ECS Service Connect (pgbouncer.odoo.local) for discovery.
   - [ EFS Mount Target ] are two mount targets of one shared EFS file system (aws_efs_file_system.odoo).
   - [ RDS Postgres ] is a single instance with multi_az=true; AWS manages the standby replica automatically.

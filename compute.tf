@@ -1,6 +1,21 @@
 # 1. Base Cluster
 resource "aws_ecs_cluster" "odoo" {
   name = "odoo-cluster"
+
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
+
+  service_connect_defaults {
+    namespace = aws_service_discovery_private_dns_namespace.odoo.arn
+  }
+}
+
+resource "aws_service_discovery_private_dns_namespace" "odoo" {
+  name        = "odoo.local"
+  description = "Service Connect discovery namespace"
+  vpc         = aws_vpc.main.id
 }
 
 data "aws_ssm_parameter" "ecs_optimized_ami" {
@@ -44,6 +59,12 @@ resource "aws_autoscaling_group" "ecs_asg" {
     id      = aws_launch_template.ecs.id
     version = "$Latest"
   }
+
+  tag {
+    key                 = "Name"
+    value               = "odoo-ecs-node"
+    propagate_at_launch = true
+  }
 }
 
 # 3. ECS Capacity Providers (Linking ASG to Cluster)
@@ -64,8 +85,11 @@ resource "aws_ecs_capacity_provider" "odoo" {
 }
 
 resource "aws_ecs_cluster_capacity_providers" "odoo" {
-  cluster_name       = aws_ecs_cluster.odoo.name
-  capacity_providers = [aws_ecs_capacity_provider.odoo.name]
+  cluster_name = aws_ecs_cluster.odoo.name
+  capacity_providers = [
+    aws_ecs_capacity_provider.odoo.name,
+    aws_ecs_capacity_provider.pgbouncer.name
+  ]
 
   default_capacity_provider_strategy {
     base              = 1
@@ -73,6 +97,7 @@ resource "aws_ecs_cluster_capacity_providers" "odoo" {
     capacity_provider = aws_ecs_capacity_provider.odoo.name
   }
 }
+
 
 # 4. Task Definition
 resource "aws_ecs_task_definition" "odoo" {
@@ -92,7 +117,6 @@ resource "aws_ecs_task_definition" "odoo" {
   memory = "7040" # 8192 - 512 (reserved for OS) - 640 (Buffer)
 
   container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
-    db_host = aws_db_instance.postgres.address
 
     # We pass the ARN
     admin_password_arn = data.aws_secretsmanager_secret.odoo_admin_passwd.arn
@@ -139,6 +163,11 @@ resource "aws_ecs_service" "odoo" {
     subnets = [aws_subnet.private_a.id, aws_subnet.private_b.id]
     # Opens access to Nginx
     security_groups = [aws_security_group.ecs_task_sg.id]
+  }
+
+  service_connect_configuration {
+    enabled   = true
+    namespace = aws_service_discovery_private_dns_namespace.odoo.arn
   }
 
   load_balancer {

@@ -5,11 +5,13 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 ## Architecture
 
 - **Global Delivery**: AWS CloudFront provides HTTPS termination and edge caching for static assets.
-- **Load Balancing**: An Application Load Balancer (ALB) distributes traffic to ECS tasks.
-- **Compute**: Odoo and Nginx run as sidecar containers in ECS Tasks on EC2 instances (m7i-flex.large).
+- **Load Balancing**: An Application Load Balancer (ALB) distributes traffic to Odoo tasks.
+- **Compute (Odoo)**: Odoo and Nginx run as sidecar containers on dedicated `m7i-flex.large` instances.
+- **PgBouncer Pooling**: A High-Availability PgBouncer layer (2 tasks) runs on dedicated `t3.micro` instances to manage database connection pooling efficiently.
+- **Service Discovery**: ECS Service Connect (`odoo.local`) provides seamless internal communication between Odoo and PgBouncer using `pgbouncer.odoo.local`.
 - **Database**: Amazon RDS for PostgreSQL (Multi-AZ) handles application data.
 - **Storage**: Amazon EFS provides a shared file system for Odoo's `filestore` and sessions.
-- **Networking**: A VPC with both public and private subnets, secured with specialized Security Groups.
+- **Networking**: A VPC with both public and private subnets, secured with specialized Security Groups for ALB, Tasks, PgBouncer, and RDS.
 
 ## Prerequisites
 
@@ -60,7 +62,8 @@ To further optimize long-term storage costs for Odoo's filestore, a triple-tier 
 
 ## Security
 
-- **Database**: RDS is situated in private subnets and only accepts traffic from ECS tasks on port 5432.
+- **Database**: RDS is situated in private subnets and **only accepts traffic from PgBouncer tasks** on port 5432.
+- **PgBouncer**: Only accepts traffic from Odoo tasks on port 6432.
 - **Zero-Knowledge Secrets Management**: 
   - **RDS Managed Passwords**: The master database password is automatically generated, encrypted, and managed natively by AWS. Plain-text credentials are **never** exposed or stored in the Terraform `tfstate` file. 
   - **Direct Secret Injection**: ECS tasks use IAM Task Execution Roles to fetch credentials directly from AWS Secrets Manager at runtime. Passwords are never passed as plain-text environment variables, protecting them from exposure in the AWS Console or logs. 

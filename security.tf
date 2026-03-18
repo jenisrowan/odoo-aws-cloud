@@ -96,7 +96,7 @@ resource "aws_security_group" "rds_sg" {
     from_port       = 5432
     to_port         = 5432
     protocol        = "tcp"
-    security_groups = [aws_security_group.ecs_task_sg.id]
+    security_groups = [aws_security_group.pgbouncer_sg.id]
   }
 
   egress {
@@ -122,6 +122,28 @@ resource "aws_security_group" "efs_sg" {
       aws_security_group.ecs_task_sg.id,
       aws_security_group.ecs_node_sg.id
     ]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# PgBouncer Security Group
+resource "aws_security_group" "pgbouncer_sg" {
+  name        = "odoo-pgbouncer-sg"
+  description = "Security group for PgBouncer tasks"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "Allow PgBouncer from Odoo tasks"
+    from_port       = 6432
+    to_port         = 6432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_task_sg.id]
   }
 
   egress {
