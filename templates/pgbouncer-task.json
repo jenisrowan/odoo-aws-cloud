@@ -66,8 +66,7 @@
         "name": "pgbouncer",
         "containerPort": 6432,
         "hostPort": 6432,
-        "protocol": "tcp",
-        "appProtocol": "tcp"
+        "protocol": "tcp"
       }
     ],
     "logConfiguration": {
