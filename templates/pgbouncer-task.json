@@ -36,11 +36,11 @@
       },
       {
         "name": "PGBOUNCER_DEFAULT_POOL_SIZE",
-        "value": "75"
+        "value": "40"
       },
       {
         "name": "PGBOUNCER_MAX_DB_CONNECTIONS",
-        "value": "80"
+        "value": "45"
       },
       {
         "name": "PGBOUNCER_SERVER_RESET_QUERY",
