@@ -7,57 +7,57 @@
     "essential": true,
     "environment": [
       {
-        "name": "PGBOUNCER_DATABASE",
-        "value": "*"
-      },
-      {
-        "name": "PGBOUNCER_PORT",
-        "value": "6432"
-      },
-      {
-        "name": "POSTGRESQL_HOST",
+        "name": "DB_HOST",
         "value": "${db_host}"
       },
       {
-        "name": "POSTGRESQL_PORT",
+        "name": "DB_PORT",
         "value": "5432"
       },
       {
-        "name": "POSTGRESQL_USERNAME",
+        "name": "DB_USER",
         "value": "odoo"
       },
       {
-        "name": "PGBOUNCER_POOL_MODE",
+        "name": "DB_NAME",
+        "value": "odoo"
+      },
+      {
+        "name": "LISTEN_PORT",
+        "value": "6432"
+      },
+      {
+        "name": "POOL_MODE",
         "value": "transaction"
       },
       {
-        "name": "PGBOUNCER_MAX_CLIENT_CONN",
+        "name": "MAX_CLIENT_CONN",
         "value": "1000"
       },
       {
-        "name": "PGBOUNCER_DEFAULT_POOL_SIZE",
+        "name": "DEFAULT_POOL_SIZE",
         "value": "40"
       },
       {
-        "name": "PGBOUNCER_MAX_DB_CONNECTIONS",
+        "name": "MAX_DB_CONNECTIONS",
         "value": "45"
       },
       {
-        "name": "PGBOUNCER_SERVER_RESET_QUERY",
+        "name": "SERVER_RESET_QUERY",
         "value": "DISCARD ALL"
       },
       {
-        "name": "PGBOUNCER_SET_QUERY_WAIT_TIMEOUT",
+        "name": "QUERY_WAIT_TIMEOUT",
         "value": "120"
       },
       {
-        "name": "PGBOUNCER_AUTH_TYPE",
+        "name": "AUTH_TYPE",
         "value": "scram-sha-256"
       }
     ],
     "secrets": [
       {
-        "name": "POSTGRESQL_PASSWORD",
+        "name": "DB_PASSWORD",
         "valueFrom": "${db_password_arn}:password::"
       }
     ],
