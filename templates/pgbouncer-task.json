@@ -51,6 +51,14 @@
         "value": "120"
       },
       {
+        "name": "QUERY_TIMEOUT",
+        "value": "300"
+      },
+      {
+        "name": "IDLE_TRANSACTION_TIMEOUT",
+        "value": "90"
+      },
+      {
         "name": "AUTH_TYPE",
         "value": "scram-sha-256"
       }
