@@ -20,7 +20,7 @@
       },
       {
         "name": "DB_NAME",
-        "value": "odoo"
+        "value": "*"
       },
       {
         "name": "LISTEN_PORT",
