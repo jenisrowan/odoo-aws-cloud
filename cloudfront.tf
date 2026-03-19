@@ -27,6 +27,7 @@ resource "aws_cloudfront_distribution" "odoo" {
   }
 
   enabled = true
+  web_acl_id = aws_wafv2_web_acl.odoo.arn
 
   # Default caching behaviour for Odoo
   default_cache_behavior {

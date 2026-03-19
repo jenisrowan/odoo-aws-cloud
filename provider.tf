@@ -17,3 +17,9 @@ terraform {
 provider "aws" {
   region = var.region
 }
+
+# WAF for CloudFront must be in us-east-1
+provider "aws" {
+  alias  = "us-east-1"
+  region = "us-east-1"
+}
