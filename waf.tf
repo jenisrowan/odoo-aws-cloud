@@ -61,12 +61,12 @@ resource "aws_wafv2_web_acl" "odoo" {
     priority = 30
 
     action {
-      block {}
+      captcha {}
     }
 
     statement {
       rate_based_statement {
-        limit              = 2000
+        limit              = 2200
         aggregate_key_type = "IP"
       }
     }
