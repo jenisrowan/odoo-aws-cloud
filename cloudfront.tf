@@ -3,7 +3,7 @@ resource "random_password" "cf_secret" {
   special = false
 }
 
-# 1. Grab AWS Managed Policies for the default Odoo app route
+# Grab AWS Managed Policies for the default Odoo app route
 data "aws_cloudfront_cache_policy" "caching_disabled" {
   name = "Managed-CachingDisabled"
 }
@@ -12,7 +12,7 @@ data "aws_cloudfront_origin_request_policy" "all_viewer" {
   name = "Managed-AllViewer"
 }
 
-# 2. Custom Cache Policy for Odoo Assets (CSS/JS)
+# Custom Cache Policy for Odoo Assets (CSS/JS)
 resource "aws_cloudfront_cache_policy" "odoo_assets" {
   name        = "odoo-assets-cache-policy"
   default_ttl = 3600
@@ -33,7 +33,7 @@ resource "aws_cloudfront_cache_policy" "odoo_assets" {
   }
 }
 
-# 3. Custom Cache Policy for Core Static Files
+# Custom Cache Policy for Core Static Files
 resource "aws_cloudfront_cache_policy" "odoo_static" {
   name        = "odoo-static-cache-policy"
   default_ttl = 86400
@@ -118,9 +118,22 @@ resource "aws_cloudfront_distribution" "odoo" {
     origin_request_policy_id = aws_cloudfront_origin_request_policy.odoo_forward_host.id
   }
 
-  # Core Static files caching behavior
+
+  # Image caching behavior (App icons, etc.)
   ordered_cache_behavior {
-    path_pattern           = "/web/static/*"
+    path_pattern           = "/web/image/*"
+    target_origin_id       = "alb-origin"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    cache_policy_id          = aws_cloudfront_cache_policy.odoo_static.id
+    origin_request_policy_id = aws_cloudfront_origin_request_policy.odoo_forward_host.id
+  }
+
+  # Module-specific static files caching behavior
+  ordered_cache_behavior {
+    path_pattern           = "/*/static/*"
     target_origin_id       = "alb-origin"
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
