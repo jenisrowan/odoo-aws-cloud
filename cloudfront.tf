@@ -59,7 +59,7 @@ resource "aws_cloudfront_origin_request_policy" "odoo_forward_host" {
   name = "odoo-forward-host-only"
 
   cookies_config {
-    cookie_behavior = "none"
+    cookie_behavior = "all"
   }
   headers_config {
     header_behavior = "whitelist"
