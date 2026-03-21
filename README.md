@@ -62,6 +62,7 @@ To further optimize long-term storage costs for Odoo's filestore, a triple-tier 
 
 ## Security
 
+- **Web Application Firewall (WAF)**: A global AWS WAF protects the CloudFront distribution with rules for IP reputation, bot control, and rate limiting against malicious traffic.
 - **Database**: RDS is situated in private subnets and **only accepts traffic from PgBouncer tasks** on port 5432.
 - **PgBouncer**: Only accepts traffic from Odoo tasks on port 6432.
 - **Zero-Knowledge Secrets Management**: 

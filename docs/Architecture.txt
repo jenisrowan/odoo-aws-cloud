@@ -1,6 +1,9 @@
        USER (Internet)
               |
               ▼
+         [ AWS WAF ] (Global)
+              |
+              ▼
    [ CloudFront Distribution ] (Global Edge)
               |
               ▼
@@ -27,6 +30,7 @@
                                   (Outgoing Traffic Only)
 
 Notes:
+  - [ AWS WAF ] Security layer protecting CloudFront with Bot Control, Rate Limiting, and IP Reputation.
   - [ Load Balancer ] is a single ALB (aws_lb.main) spanning both public subnets for HA.
   - [ Regional NAT GW ] is a single logical resource in Automatic Mode that AWS scales dynamically.
   - [ Odoo Service ] Odoo connects to EFS Mounting target for file storage and PgBouncer for database pooling.
