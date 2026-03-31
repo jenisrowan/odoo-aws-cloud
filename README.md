@@ -29,6 +29,7 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 
 2.  **Initialize Terraform**:
     ```bash
+    cd terraform
     terraform init
     ```
 
@@ -41,6 +42,7 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 
 4.  **Deploy**:
     ```bash
+    cd terraform
     terraform apply
     ```
 

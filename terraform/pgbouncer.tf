@@ -10,7 +10,7 @@ resource "aws_ecs_task_definition" "pgbouncer" {
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
 
-  container_definitions = templatefile("${path.module}/templates/pgbouncer-task.json", {
+  container_definitions = templatefile("${path.module}/../templates/pgbouncer-task.json", {
     db_host         = aws_db_instance.postgres.address
     db_password_arn = aws_db_instance.postgres.master_user_secret[0].secret_arn
     aws_region      = var.region

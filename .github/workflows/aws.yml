@@ -33,9 +33,11 @@ jobs:
       uses: hashicorp/setup-terraform@v4
 
     - name: Terraform Init
+      working-directory: ./terraform
       run: terraform init
 
     - name: Create ECR Repositories via Terraform
+      working-directory: ./terraform
       run: |
         terraform apply -auto-approve \
           -target="aws_ecr_repository.odoo" \
@@ -68,6 +70,7 @@ jobs:
         echo "nginx_image=$ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
 
     - name: Terraform Apply
+      working-directory: ./terraform
       run: |
         terraform apply -auto-approve \
           -var="odoo_image_url=${{ env.odoo_image }}" \

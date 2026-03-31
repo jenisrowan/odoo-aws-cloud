@@ -116,7 +116,7 @@ resource "aws_ecs_task_definition" "odoo" {
   cpu    = "1664" # 2048 - 256 (reserved for OS) - 128 (Buffer)
   memory = "7040" # 8192 - 512 (reserved for OS) - 640 (Buffer)
 
-  container_definitions = templatefile("${path.module}/templates/odoo-task.json", {
+  container_definitions = templatefile("${path.module}/../templates/odoo-task.json", {
 
     # We pass the ARN
     admin_password_arn = data.aws_secretsmanager_secret.odoo_admin_passwd.arn
