@@ -10,6 +10,8 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 - **PgBouncer Pooling**: A High-Availability PgBouncer layer (2 tasks) runs on dedicated `t3.micro` instances to manage database connection pooling efficiently.
 - **Service Discovery**: ECS Service Connect (`odoo.local`) provides seamless internal communication between Odoo and PgBouncer using `pgbouncer.odoo.local`.
 - **Database**: Amazon RDS for PostgreSQL (Multi-AZ) handles application data.
+- **Cache**: **Amazon ElastiCache for Valkey** (Serverless) provides high-performance, cost-effective caching for session management and performance tuning.
+- **AI Research**: **Amazon Bedrock** integration with a Supervisor Agent, Knowledge Base (using **Amazon OpenSearch Serverless** as a vector store), and S3-based document vault.
 - **Storage**: Amazon EFS provides a shared file system for Odoo's `filestore` and sessions.
 - **Networking**: A VPC with both public and private subnets, secured with specialized Security Groups for ALB, Tasks, PgBouncer, and RDS.
 
@@ -34,17 +36,29 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
     ```
 
 3.  **Setup AWS Secrets**:
-    Before deploying, you must manually create a secret in AWS Secrets Manager to store the Odoo Admin password. *(Note: The PostgreSQL database password is automatically generated and managed by AWS RDS).*
-    - Go to AWS Secrets Manager -> Store a new secret.
-    - Choose **Other type of secret**.
-    - Add a Key/Value pair: Key = `password`, Value = `[Your_Secure_Password]`.
-    - Name the secret: `odoo/admin/password`.
+    Before deploying, you must manually create two secrets in AWS Secrets Manager:
+    - **Odoo Admin Password**:
+        - Choose **Other type of secret**.
+        - Add a Key/Value pair: Key = `password`, Value = `[Your_Secure_Password]`.
+        - Name the secret: `odoo/admin/password`.
+    - **Tavily API Key (for AI Research)**:
+        - Choose **Other type of secret**.
+        - Add a Key/Value pair: Key = `api_key`, Value = `[Your_Tavily_API_Key]`.
+        - Name the secret: `tavily/api_key`.
 
 4.  **Deploy**:
     ```bash
     cd terraform
     terraform apply
     ```
+
+## AI-Powered Customer Research
+
+This infrastructure includes a built-in AI research pipeline using Amazon Bedrock:
+- **Supervisor Agent**: Orchestrates research tasks using Claude 3.5 Sonnet.
+- **Web Search**: A "Librarian" Lambda function searches the web via **Tavily** for real-time news.
+- **Knowledge Base**: An RAG (Retrieval-Augmented Generation) system backed by **OpenSearch Serverless** allows the agent to search internal PDFs and 10-K filings stored in S3.
+- **Odoo Integration**: A dedicated "Odoo Integrator" Lambda pushes finalized reports directly into Odoo CRM records.
 
 ## Performance & Tuning
 
@@ -55,6 +69,11 @@ To reduce configuration complexity and minimize costs, this project utilizes a *
 - **Cost Savings**: By using a single Regional NAT Gateway shared across private subnets, we avoid the fixed hourly charges of multiple NAT Gateways in different Availability Zones.
 - **Data Transfer**: This design is especially cost-effective if certain AZs have no active resources, as it eliminates NAT-related idle costs while maintaining outbound internet access for private workloads.
 - **Smarter Traffic**: Zero multi-AZ transfer charges for regional NAT gateways, as AWS will pick the NAT in the current AZ for outbound traffic.
+
+### Valkey for Caching
+We use **Valkey 8.2 (Serverless)** through Amazon ElastiCache. Valkey is a fully open-source, high-performance alternative to Redis that offers significant cost savings (up to 33% with Serverless) while remaining fully compatible with Redis clients.
+- **Auto-Scaling**: The serverless configuration scales dynamically based on workload.
+- **Persistence**: Used for Odoo session storage (optional) and Bedrock agent session caching.
 
 ### EFS Storage Tiering
 To further optimize long-term storage costs for Odoo's filestore, a triple-tier lifecycle policy is implemented:

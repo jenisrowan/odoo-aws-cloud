@@ -7,27 +7,43 @@
    [ CloudFront Distribution ] (Global Edge)
               |
               ▼
- [ Internet Gateway ] <---------------------------------------------------------------------- [ VPC: 10.0.0.0/16 ]
-              |                                                                                               |
-              |          _____________________________________________________________________________________|___________________
-              |         |                               |                                |                                 |
-              ▼         ▼                               ▼                                ▼                                 ▼
-+-----------------------------+ +-----------------------------+ +--------------------------------+ +--------------------------------+
-|  PUBLIC SUBNET (public_a)   | |  PUBLIC SUBNET (public_b)   | | PRIVATE SUBNET (private_a)     | | PRIVATE SUBNET (private_b)     |
-|       (10.0.1.0/24)         | |       (10.0.4.0/24)         | |       (10.0.2.0/24)            | |       (10.0.3.0/24)            |
-+-----------------------------+ +-----------------------------+ +--------------------------------+ +--------------------------------+
-|      [ Load Balancer ]      | |      [ Load Balancer ]      | |      [ Odoo Service ]          | |      [ Odoo Service ]          |
-|             |               | |              |              | |      (Nginx + Odoo)            | |      (Nginx + Odoo)            |
-|             +---------------|-|--------------+--------------|-|---->  /          \   ----------|-|---->  /          \             |
-|                             | |                             | |      ▼            ▼            | |      ▼            ▼            |
-|                             | |                             | | [ EFS Target ] [ PgBouncer ] <-|-|-> [ EFS Target ] [ PgBouncer ] |
-|                             | |                             | |      | (File IO)  | (Pooling)  | |      | (File IO)  | (Pooling)  |
-|   [ Regional NAT GW ] <-----|-|-----[ Regional NAT GW ] <---|-|------|------------+------------|-|------|------------+            |
-+-------------|---------------+ +--------------|--------------+ |                   ▼            | |                   ▼            |
-              |                                |                |    [ RDS Postgres ] (Pri) -----|-|-> [ RDS Postgres ] (Replica)   |
-              |                                |                +--------------------------------+ +--------------------------------+
-              └────────────────────────────────┴───────────────────────────────┘
-                                  (Outgoing Traffic Only)
+ [ Internet Gateway ] <----------------------------------------------------------------- [ VPC: 10.0.0.0/16 ]
+              |                                                                                   |
+  ____________|___________________________________________________________________________________|____________
+ |                            |                             |                                     |            |
+ ▼                            ▼                             ▼                                     ▼            |
++--------------------------+ +--------------------------+ +-----------------------------------+ +-----------------------------------+
+| PUBLIC SUBNET (AZ-a)     | | PUBLIC SUBNET (AZ-b)     | | PRIVATE SUBNET (AZ-a)             | | PRIVATE SUBNET (AZ-b)             |
+| (10.0.1.0/24)            | | (10.0.4.0/24)            | | (10.0.2.0/24)                     | | (10.0.3.0/24)                     |
++--------------------------+ +--------------------------+ +-----------------------------------+ +-----------------------------------+
+| [ Application Load     ] | | [ Application Load     ] | |      [ Odoo Task (ECS) ]          | |      [ Odoo Task (ECS) ]          |
+| [      Balancer        ] | | [      Balancer        ] | |   (Nginx + Odoo Container)        | |   (Nginx + Odoo Container)        |
+|            |             | |            |             | |        /        |        \        | |        /        |        \        |
+|            +-------------|-|------------+-------------|-|------> ▼        ▼        ▼        |-|------> ▼        ▼        ▼        |
+|                          | |                          | |     [ EFS ] [ Valkey ] [PgBouncer]| |     [ EFS ] [ Valkey ] [PgBouncer]|
+|                          | |                          | |                             |     | |                             |     |
+|                          | |                          | |                             ▼     | |                             ▼     |
+| [ Regional NAT Gateway ] | | [ Regional NAT Gateway ] | |               [ RDS Postgres ]    | |               [ RDS Postgres ]    |
+|                          | |                          | |               (Primary)    ====(Sync)====>      (Standby)               |
++------------|-------------+ +------------|-------------+ +-----------------------------------+ +-----------------------------------+
+             |                            |                                |                                     |
+             └────────────────────────────┴──────(Egress to AWS APIs)──────┴─────────────────────────────────────┘
+                                                                           |
+                                                                           ▼
+                                                                   [ Amazon Bedrock ]
+                                                                   (Supervisor Agent)
+                                                                           |
+                                           ________________________________|________________________________
+                                          |                                |                                |
+                                          ▼                                ▼                                ▼
+                               [ Librarian (Lambda) ] <-----> [ Web Search (Tavily) ]          [ Odoo Integrator (Lambda) ]
+                                          |                                                                 |
+                                          ▼                                                                 ▼
+                               [ Knowledge Base ] <---------> [ S3 Research Vault ]                 [ Odoo CRM UI ]
+                                          |
+                                          ▼
+                             [ OpenSearch Serverless ]
+                                  (Vector Store)
 
 Notes:
   - [ AWS WAF ] Security layer protecting CloudFront with Bot Control, Rate Limiting, and IP Reputation.
@@ -37,3 +53,8 @@ Notes:
   - [ PgBouncer HA ] It uses ECS Service Connect (pgbouncer.odoo.local) for discovery.
   - [ EFS Mount Target ] are two mount targets of one shared EFS file system (aws_efs_file_system.odoo).
   - [ RDS Postgres ] is a single instance with multi_az=true; AWS manages the standby replica automatically.
+
+Additional Infrastructure Notes (AI & Caching):
+  - [ Amazon Bedrock ] Supervisor Agent (Claude 3.5 Sonnet) orchestrating autonomous research workflows.
+  - [ Knowledge Base ] RAG implementation using OpenSearch Serverless as a vector database.
+  - [ Research Lambdas ] Functions ("Librarian" & "Odoo Integrator") that execute research and sync data.

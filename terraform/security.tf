@@ -167,14 +167,14 @@ resource "aws_security_group" "pgbouncer_sg" {
   }
 }
 
-# Redis Security Group
-resource "aws_security_group" "redis_sg" {
-  name        = "odoo-redis-sg"
-  description = "Security group for ElastiCache Redis"
+# Valkey Security Group
+resource "aws_security_group" "valkey_sg" {
+  name        = "odoo-valkey-sg"
+  description = "Security group for ElastiCache Valkey"
   vpc_id      = aws_vpc.main.id
 
   ingress {
-    description     = "Allow Redis from Odoo tasks"
+    description     = "Allow Valkey from Odoo tasks"
     from_port       = 6379
     to_port         = 6379
     protocol        = "tcp"

@@ -21,7 +21,8 @@ def invoke_bedrock_agent(db_name, record_id, company_name):
         
         try:
             redis_host = os.environ.get('REDIS_HOST', 'redis')
-            redis_client = redis.Redis(host=redis_host, port=6379, db=0)
+            redis_port = int(os.environ.get('REDIS_PORT', 6379))
+            redis_client = redis.Redis(host=redis_host, port=redis_port, db=0)
             redis_client.set(f"report_status_{record_id}", "Analysis in process")
             logger.info(f"Pushed status to ElastiCache for {record_id}")
             

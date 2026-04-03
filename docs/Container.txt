@@ -1,11 +1,17 @@
-ECS Cluster
- ├── Odoo Pool (m7i-flex.large)
- │    └── ECS Task (1:1 Ratio with Instance)
- │         ├── Nginx Container (Reverse Proxy)
- │         └── Odoo Container (ERP Application)
- └── PgBouncer Pool (t3.micro - HA x2)
-      └── ECS Task (1:1 Ratio with Instance)
-           └── PgBouncer Container (bitnami/pgbouncer)
+Compute & Serverless Architecture
+ ├── ECS Cluster (EC2 Capacity Provider)
+ │    ├── Odoo Pool (m7i-flex.large)
+ │    │    └── ECS Task (1:1 Ratio with Instance)
+ │    │         ├── Nginx Container (Reverse Proxy)
+ │    │         └── Odoo Container (ERP Application)
+ │    └── PgBouncer Pool (t3.micro - HA x2)
+ │         └── ECS Task (1:1 Ratio with Instance)
+ │              └── PgBouncer Container (bitnami/pgbouncer)
+ ├── AWS Lambda
+ │    ├── Librarian (Web Search & Tavily Integration)
+ │    └── Odoo Integrator (VPC-enabled, Syncs research to ERP)
+ └── Amazon ElastiCache (Serverless)
+      └── Valkey 8.2 (High-speed session & agent cache)
 
 Resource Allocation (Odoo Task: 1.6 vCPU / 7 GiB | PgBouncer: 1.25 vCPU / 0.5 GiB)
  ├── Host Reservation: 256 CPU / 512 MiB (OS & Daemon stability)
@@ -13,5 +19,6 @@ Resource Allocation (Odoo Task: 1.6 vCPU / 7 GiB | PgBouncer: 1.25 vCPU / 0.5 Gi
  └── PgBouncer Task: 1280 CPU / 512 MiB (Dedicated micro pool)
 
 Scaling Architecture
- ├── Max 4 Odoo Instances = Max 4 ERP Tasks
- └── Locked 2 PgBouncer Instances = High Availability Pooling
+ ├── ECS: Max 4 Odoo Instances / Locked 2 PgBouncer Instances
+ ├── Lambda: On-demand execution for AI research tasks
+ └── Valkey: Dynamic serverless scaling

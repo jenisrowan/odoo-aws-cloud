@@ -23,6 +23,10 @@
         "value": "${redis_host}"
       },
       {
+        "name": "REDIS_PORT",
+        "value": "${redis_port}"
+      },
+      {
         "name": "BEDROCK_AGENT_ID",
         "value": "${bedrock_agent_id}"
       },
