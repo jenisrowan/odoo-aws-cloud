@@ -7,3 +7,14 @@
 
 *.tfvars
 .terraform.lock.hcl
+
+# Odoo & Local Dev
+*.pyc
+__pycache__/
+.env
+.ipynb_checkpoints/
+.vscode/
+
+# Local Odoo Data
+odoo-data/
+db-data/

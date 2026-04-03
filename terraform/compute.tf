@@ -124,9 +124,12 @@ resource "aws_ecs_task_definition" "odoo" {
     # Grab the ARN of the auto-generated secret directly from RDS
     db_password_arn = aws_db_instance.postgres.master_user_secret[0].secret_arn
 
-    nginx_image_url = var.nginx_image_url
-    odoo_image_url  = var.odoo_image_url
-    aws_region      = var.region
+    nginx_image_url        = var.nginx_image_url
+    odoo_image_url         = var.odoo_image_url
+    aws_region             = var.region
+    redis_host             = aws_elasticache_cluster.redis.cache_nodes[0].address
+    bedrock_agent_id       = aws_bedrockagent_agent.supervisor.id
+    bedrock_agent_alias_id = aws_bedrockagent_agent_alias.prod.agent_alias_id
   })
 
   volume {

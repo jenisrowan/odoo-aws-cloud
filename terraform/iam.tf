@@ -114,3 +114,159 @@ resource "aws_iam_role_policy" "ecs_task_exec_policy" {
     ]
   })
 }
+
+# --- Bedrock and Multi-Agent IAM ---
+
+# 1. ECS Task capability to Invoke Bedrock Agent
+resource "aws_iam_role_policy" "ecs_bedrock_invoke_policy" {
+  name = "odoo-ecs-bedrock-invoke"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["bedrock:InvokeAgent"]
+        Effect   = "Allow"
+        Resource = aws_bedrockagent_agent.supervisor.agent_arn
+      }
+    ]
+  })
+}
+
+# 2. Bedrock Supervisor Agent Role
+resource "aws_iam_role" "bedrock_agent_role" {
+  name = "bedrock-supervisor-agent-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = { Service = "bedrock.amazonaws.com" }
+        Effect    = "Allow"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "bedrock_agent_policy" {
+  name = "bedrock-supervisor-policy"
+  role = aws_iam_role.bedrock_agent_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["bedrock:InvokeModel"]
+        Effect   = "Allow"
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"]
+      },
+      {
+        Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
+        Effect   = "Allow"
+        Resource = [aws_bedrockagent_knowledge_base.research_kb.arn]
+      },
+      {
+        Action   = ["lambda:InvokeFunction"]
+        Effect   = "Allow"
+        Resource = [aws_lambda_function.librarian.arn, aws_lambda_function.odoo_integrator.arn]
+      }
+    ]
+  })
+}
+
+# 3. Bedrock Knowledge Base Role
+resource "aws_iam_role" "bedrock_kb_role" {
+  name = "bedrock-knowledge-base-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = { Service = "bedrock.amazonaws.com" }
+        Effect    = "Allow"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "bedrock_kb_opensearch" {
+  role       = aws_iam_role.bedrock_kb_role.name
+  policy_arn = "arn:aws:iam::aws:policy/AmazonOpenSearchServerlessDataAccess"
+}
+
+resource "aws_iam_role_policy" "bedrock_kb_policy" {
+  name = "bedrock-kb-s3-policy"
+  role = aws_iam_role.bedrock_kb_role.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["s3:GetObject", "s3:ListBucket"]
+        Effect   = "Allow"
+        Resource = [aws_s3_bucket.company_research_vault.arn, "${aws_s3_bucket.company_research_vault.arn}/*"]
+      },
+      {
+        Action   = ["bedrock:InvokeModel"]
+        Effect   = "Allow"
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.titan-embed-text-v2:0"]
+      }
+    ]
+  })
+}
+
+# 4. Lambda Roles
+resource "aws_iam_role" "librarian_lambda_role" {
+  name = "librarian-lambda-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = { Service = "lambda.amazonaws.com" }
+        Effect    = "Allow"
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "librarian_basic" {
+  role       = aws_iam_role.librarian_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "librarian_secrets_policy" {
+  name = "librarian-secrets-policy"
+  role = aws_iam_role.librarian_lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["secretsmanager:GetSecretValue"]
+        Effect   = "Allow"
+        Resource = data.aws_secretsmanager_secret.tavily_api_key.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "odoo_integrator_lambda_role" {
+  name = "odoo-integrator-lambda-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Principal = { Service = "lambda.amazonaws.com" }
+        Effect    = "Allow"
+      }
+    ]
+  })
+}
+resource "aws_iam_role_policy_attachment" "odoo_integrator_basic" {
+  role       = aws_iam_role.odoo_integrator_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+resource "aws_iam_role_policy_attachment" "odoo_integrator_vpc" {
+  role       = aws_iam_role.odoo_integrator_lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}

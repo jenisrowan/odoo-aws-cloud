@@ -17,6 +17,18 @@
       {
         "name": "USER",
         "value": "odoo"
+      },
+      {
+        "name": "REDIS_HOST",
+        "value": "${redis_host}"
+      },
+      {
+        "name": "BEDROCK_AGENT_ID",
+        "value": "${bedrock_agent_id}"
+      },
+      {
+        "name": "BEDROCK_AGENT_ALIAS_ID",
+        "value": "${bedrock_agent_alias_id}"
       }
     ],
     "secrets": [

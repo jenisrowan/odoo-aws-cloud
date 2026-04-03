@@ -3,9 +3,20 @@ FROM odoo:19.0
 USER root
 
 # Copy the custom Odoo configuration file
-COPY odoo.conf /etc/odoo/odoo.conf
+COPY templates/odoo.conf /etc/odoo/odoo.conf
+
+# Copy custom addons
+COPY custom_addons /mnt/extra-addons
+
+# Install tracking packages for Bedrock and Redis using official Debian packages
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3-boto3 \
+    python3-redis && \
+    rm -rf /var/lib/apt/lists/*
 
 # Ensure correct ownership
-RUN chown odoo:odoo /etc/odoo/odoo.conf
+RUN chown odoo:odoo /etc/odoo/odoo.conf && \
+    chown -R odoo:odoo /mnt/extra-addons
 
 USER odoo

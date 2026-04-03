@@ -60,6 +60,19 @@ resource "aws_security_group" "ecs_node_sg" {
   }
 }
 
+resource "aws_security_group" "lambda_odoo_integrator_sg" {
+  name        = "lambda-odoo-integrator-sg"
+  description = "Security group for lambda odoo integrator"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
 resource "aws_security_group" "ecs_task_sg" {
   name        = "odoo-ecs-task-sg"
   description = "Allow traffic from ALB directly to the Odoo task ENI"
@@ -142,6 +155,28 @@ resource "aws_security_group" "pgbouncer_sg" {
     description     = "Allow PgBouncer from Odoo tasks"
     from_port       = 6432
     to_port         = 6432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.ecs_task_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+# Redis Security Group
+resource "aws_security_group" "redis_sg" {
+  name        = "odoo-redis-sg"
+  description = "Security group for ElastiCache Redis"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "Allow Redis from Odoo tasks"
+    from_port       = 6379
+    to_port         = 6379
     protocol        = "tcp"
     security_groups = [aws_security_group.ecs_task_sg.id]
   }

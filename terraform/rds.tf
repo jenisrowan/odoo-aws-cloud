@@ -5,7 +5,7 @@ resource "aws_db_subnet_group" "rds" {
 
 resource "aws_db_instance" "postgres" {
   engine         = "postgres"
-  engine_version = "15"
+  engine_version = "16"
   instance_class = "db.t4g.micro"
 
   multi_az          = true
@@ -18,14 +18,14 @@ resource "aws_db_instance" "postgres" {
 
   db_subnet_group_name   = aws_db_subnet_group.rds.name
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
-  parameter_group_name   = aws_db_parameter_group.postgres15.name
+  parameter_group_name   = aws_db_parameter_group.postgres16.name
   skip_final_snapshot    = true
 }
 
 # postgresql.conf equivalent
-resource "aws_db_parameter_group" "postgres15" {
-  name   = "odoo-postgres15-params"
-  family = "postgres15"
+resource "aws_db_parameter_group" "postgres16" {
+  name   = "odoo-postgres16-params"
+  family = "postgres16"
 
   # Increase connections to handle 4 scaled Odoo tasks on micro RAM
   parameter {
