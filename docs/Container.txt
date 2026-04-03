@@ -11,7 +11,7 @@ Compute & Serverless Architecture
  │    ├── Librarian (Web Search & Tavily Integration)
  │    └── Odoo Integrator (VPC-enabled, Syncs research to ERP)
  └── Amazon ElastiCache (Serverless)
-      └── Valkey 8.2 (High-speed session & agent cache)
+      └── Valkey 8.2 (High-speed AI task status & agent cache)
 
 Resource Allocation (Odoo Task: 1.6 vCPU / 7 GiB | PgBouncer: 1.25 vCPU / 0.5 GiB)
  ├── Host Reservation: 256 CPU / 512 MiB (OS & Daemon stability)

@@ -10,7 +10,7 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 - **PgBouncer Pooling**: A High-Availability PgBouncer layer (2 tasks) runs on dedicated `t3.micro` instances to manage database connection pooling efficiently.
 - **Service Discovery**: ECS Service Connect (`odoo.local`) provides seamless internal communication between Odoo and PgBouncer using `pgbouncer.odoo.local`.
 - **Database**: Amazon RDS for PostgreSQL (Multi-AZ) handles application data.
-- **Cache**: **Amazon ElastiCache for Valkey** (Serverless) provides high-performance, cost-effective caching for session management and performance tuning.
+- **Cache**: **Amazon ElastiCache for Valkey** (Serverless) provides high-performance, asynchronous status tracking and coordination for long-running AI research tasks.
 - **AI Research**: **Amazon Bedrock** integration with a Supervisor Agent, Knowledge Base (using **Amazon OpenSearch Serverless** as a vector store), and S3-based document vault.
 - **Storage**: Amazon EFS provides a shared file system for Odoo's `filestore` and sessions.
 - **Networking**: A VPC with both public and private subnets, secured with specialized Security Groups for ALB, Tasks, PgBouncer, and RDS.
@@ -73,7 +73,7 @@ To reduce configuration complexity and minimize costs, this project utilizes a *
 ### Valkey for Caching
 We use **Valkey 8.2 (Serverless)** through Amazon ElastiCache. Valkey is a fully open-source, high-performance alternative to Redis that offers significant cost savings (up to 33% with Serverless) while remaining fully compatible with Redis clients.
 - **Auto-Scaling**: The serverless configuration scales dynamically based on workload.
-- **Persistence**: Used for Odoo session storage (optional) and Bedrock agent session caching.
+- **State Management**: Used for real-time status tracking of long-running AI research tasks and agent coordination.
 
 ### EFS Storage Tiering
 To further optimize long-term storage costs for Odoo's filestore, a triple-tier lifecycle policy is implemented:
