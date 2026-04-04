@@ -32,6 +32,9 @@ jobs:
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v4
 
+    - name: Setup Docker Buildx
+      uses: docker/setup-buildx-action@v4
+
     - name: Terraform Init
       working-directory: ./terraform
       run: terraform init
@@ -51,27 +54,29 @@ jobs:
 
     - name: Build, tag, and push Odoo image
       id: build-odoo
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$ODOO_ECR_REPOSITORY:$IMAGE_TAG -f templates/Dockerfile.odoo .
-        docker push $ECR_REGISTRY/$ODOO_ECR_REPOSITORY:$IMAGE_TAG
-        echo "odoo_image=$ECR_REGISTRY/$ODOO_ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+      uses: docker/build-push-action@v7
+      with:
+        context: .
+        file: templates/Dockerfile.odoo
+        push: true
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ODOO_ECR_REPOSITORY }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Build, tag, and push Nginx image
       id: build-nginx
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: ${{ github.sha }}
-      run: |
-        docker build -t $ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG -f templates/Dockerfile.nginx templates/
-        docker push $ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG
-        echo "nginx_image=$ECR_REGISTRY/$NGINX_ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_ENV
+      uses: docker/build-push-action@v7
+      with:
+        context: templates/
+        file: templates/Dockerfile.nginx
+        push: true
+        tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.NGINX_ECR_REPOSITORY }}:${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Terraform Apply
       working-directory: ./terraform
       run: |
         terraform apply -auto-approve \
-          -var="odoo_image_url=${{ env.odoo_image }}" \
-          -var="nginx_image_url=${{ env.nginx_image }}"
+          -var="odoo_image_url=${{ steps.login-ecr.outputs.registry }}/${{ env.ODOO_ECR_REPOSITORY }}:${{ github.sha }}" \
+          -var="nginx_image_url=${{ steps.login-ecr.outputs.registry }}/${{ env.NGINX_ECR_REPOSITORY }}:${{ github.sha }}"
