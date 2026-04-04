@@ -21,7 +21,8 @@ resource "aws_bedrockagent_knowledge_base" "research_kb" {
   }
   depends_on = [
     aws_opensearchserverless_collection.bedrock_kb,
-    aws_iam_role_policy.bedrock_kb_oss_access_policy
+    aws_iam_role_policy.bedrock_kb_oss_access_policy,
+    opensearch_index.bedrock_index
   ]
 }
 

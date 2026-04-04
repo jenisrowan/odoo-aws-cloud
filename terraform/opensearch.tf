@@ -81,3 +81,38 @@ resource "aws_opensearchserverless_access_policy" "data_access" {
     }
   ])
 }
+
+resource "opensearch_index" "bedrock_index" {
+  name                           = "bedrock-knowledge-base-default-index"
+  index_knn                      = true
+  index_knn_algo_param_ef_search = "512"
+
+  mappings = jsonencode({
+    properties = {
+      "bedrock-knowledge-base-default-vector" = {
+        type      = "knn_vector"
+        dimension = 1024
+        method = {
+          name       = "hnsw"        # Hierarchical Navigable Small World
+          engine     = "faiss"       # Facebook AI Similarity Search
+          space_type = "cosinesimil" # Cosine Similarity
+          parameters = {
+            m               = 16
+            ef_construction = 512
+          }
+        }
+      }
+      "AMAZON_BEDROCK_TEXT_CHUNK" = {
+        type = "text"
+      }
+      "AMAZON_BEDROCK_METADATA" = {
+        type = "text"
+      }
+    }
+  })
+
+  depends_on = [
+    aws_opensearchserverless_collection.bedrock_kb,
+    aws_opensearchserverless_access_policy.data_access
+  ]
+}
