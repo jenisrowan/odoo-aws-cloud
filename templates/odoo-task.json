@@ -5,6 +5,14 @@
     "cpu": 1536,
     "memory": 6912,
     "essential": true,
+    "portMappings": [
+      {
+        "name": "odoo",
+        "containerPort": 8069,
+        "hostPort": 8069,
+        "protocol": "tcp"
+      }
+    ],
     "environment": [
       {
         "name": "HOST",

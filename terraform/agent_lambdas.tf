@@ -49,6 +49,13 @@ resource "aws_lambda_function" "odoo_integrator" {
     subnet_ids         = [aws_subnet.private_a.id, aws_subnet.private_b.id]
     security_group_ids = [aws_security_group.lambda_odoo_integrator_sg.id]
   }
+
+  environment {
+    variables = {
+      ODOO_URL                    = "http://odoo.odoo.local:8069"
+      ODOO_CREDENTIALS_SECRET_ARN = data.aws_secretsmanager_secret.odoo_integration_credentials.arn
+    }
+  }
 }
 
 resource "aws_lambda_permission" "bedrock_invoke_odoo_integrator" {

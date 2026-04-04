@@ -36,39 +36,24 @@ def invoke_bedrock_agent(db_name, record_id, company_name):
                 agentId=agent_id,
                 agentAliasId=agent_alias_id,
                 sessionId=f"session-{record_id}",
-                inputText=f"Please compile a full report on {company_name} and submit it to Odoo for partner id {record_id}. Make sure to invoke OdooIntegrator.",
-                enableTrace=True
+                inputText=f"Research {company_name} and submit the final report to Odoo database '{db_name}' for record ID {record_id}. Make sure to invoke the OdooIntegrator tool to save the results.",
+                enableTrace=False
             )
             
             report_text = ""
-            action_group_payload = None
-            
             for event in response.get('completion'):
                 if 'chunk' in event:
                     chunk_data = event['chunk']['bytes'].decode('utf-8')
                     report_text += chunk_data
-                elif 'trace' in event:
-                    try:
-                        trace_obj = event['trace'].get('trace', {})
-                        orch = trace_obj.get('orchestrationTrace', {})
-                        obs = orch.get('observation', {})
-                        ag_out = obs.get('actionGroupInvocationOutput', {})
-                        text_payload = ag_out.get('text')
-                        if text_payload:
-                            parsed_payload = json.loads(text_payload)
-                            if "report_file_b64" in parsed_payload:
-                                action_group_payload = parsed_payload
-                    except Exception as e:
-                        logger.warning("Failed to parse trace: %s", str(e))
-                        
-            # Extract response and write to report_file
-            if action_group_payload and "report_file_b64" in action_group_payload:
-                record.report_file = action_group_payload["report_file_b64"]
-                record.report_filename = action_group_payload.get("filename", f"{company_name}_report.txt")
-            else:
-                # Fallback if the agent didn't invoke the action group
+            
+            # We only use report_text as a fallback if the record is still empty.
+            record.invalidate_recordset() # Refresh from DB to see Lambda's changes
+            if not record.report_file:
+                logger.info(f"Lambda sync not detected for {record_id}, falling back to AI completion text.")
                 record.report_file = base64.b64encode(report_text.encode('utf-8'))
                 record.report_filename = f"{company_name}_report.txt"
+           
+            logger.info(f"AI Research complete for {company_name}. Final message: {report_text[:100]}...")
                 
         except Exception as e:
             logger.error("Bedrock background task failed: %s", str(e))

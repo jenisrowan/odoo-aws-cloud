@@ -175,6 +175,12 @@ resource "aws_ecs_service" "odoo" {
     namespace = aws_service_discovery_private_dns_namespace.odoo.arn
   }
 
+  service_registries {
+    registry_arn   = aws_service_discovery_service.odoo.arn
+    container_name = "odoo"
+    container_port = 8069
+  }
+
   load_balancer {
     target_group_arn = aws_lb_target_group.odoo.arn
     container_name   = "nginx"
@@ -184,6 +190,24 @@ resource "aws_ecs_service" "odoo" {
   # Terraform should not override autoscaling
   lifecycle {
     ignore_changes = [desired_count]
+  }
+}
+
+resource "aws_service_discovery_service" "odoo" {
+  name = "odoo"
+
+  dns_config {
+    namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
+
+    dns_records {
+      ttl  = 60
+      type = "A"
+    }
+
+    routing_policy = "MULTIVALUE"
+  }
+
+  health_check_custom_config {
   }
 }
 

@@ -89,6 +89,14 @@ resource "aws_security_group" "ecs_task_sg" {
     ]
   }
 
+  ingress {
+    description     = "Direct XML-RPC from Odoo Integrator Lambda only"
+    from_port       = 8069
+    to_port         = 8069
+    protocol        = "tcp"
+    security_groups = [aws_security_group.lambda_odoo_integrator_sg.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0

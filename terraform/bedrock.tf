@@ -4,7 +4,7 @@ resource "aws_bedrockagent_knowledge_base" "research_kb" {
   knowledge_base_configuration {
     type = "VECTOR"
     vector_knowledge_base_configuration {
-      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.nova-2-multimodal-embeddings-v1:0"
+      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.nova-2-multimodal-embeddings-v1:0"
     }
   }
   storage_configuration {
@@ -40,9 +40,11 @@ resource "aws_bedrockagent_agent" "supervisor" {
   agent_name                  = "CustomerResearchSupervisor"
   agent_resource_role_arn     = aws_iam_role.bedrock_agent_role.arn
   foundation_model            = "anthropic.claude-4-6-sonnet-20260215-v1:0"
-  instruction                 = "You are a customer research supervisor. Your job is to compile a complete briefing by searching the web and the internal document vault to find all relevant information on a company. Once compiled, use the OdooIntegrator to push the final report back directly to Odoo."
+  instruction                 = "You are a customer research supervisor. Your job is to compile a complete briefing by searching the web and the internal document vault to find all relevant information on a company. Once compiled, use the OdooIntegrator to push the final report back directly to Odoo. IMPORTANT: Always provide the current database_name and company_name when calling the OdooIntegrator."
   idle_session_ttl_in_seconds = 1800
 }
+
+# (Actions Groups)
 
 resource "aws_bedrockagent_agent_action_group" "web_search" {
   agent_id           = aws_bedrockagent_agent.supervisor.id
@@ -138,12 +140,20 @@ resource "aws_bedrockagent_agent_action_group" "odoo_integrator" {
                         "type"        = "integer",
                         "description" = "The ID of the Partner/Lead in Odoo."
                       },
+                      "database_name" = {
+                        "type"        = "string",
+                        "description" = "The exact name of the Odoo database to update."
+                      },
+                      "company_name" = {
+                        "type"        = "string",
+                        "description" = "The name of the company researched."
+                      },
                       "report" = {
                         "type"        = "string",
                         "description" = "The markdown or HTML report content."
                       }
                     },
-                    "required" = ["partner_id", "report"]
+                    "required" = ["partner_id", "database_name", "company_name", "report"]
                   }
                 }
               }

@@ -36,11 +36,17 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
     ```
 
 3.  **Setup AWS Secrets**:
-    Before deploying, you must manually create two secrets in AWS Secrets Manager:
-    - **Odoo Admin Password**:
+    Before deploying, you must manually create three secrets in AWS Secrets Manager:
+    - **Odoo Application Password**:
         - Choose **Other type of secret**.
-        - Add a Key/Value pair: Key = `password`, Value = `[Your_Secure_Password]`.
+        - Add a Key/Value pair: Key = `password`, Value = `[Your_Secure_Master_Password]`.
         - Name the secret: `odoo/admin/password`.
+    - **Odoo Integration Credentials (API Keys)**:
+        - Choose **Other type of secret**.
+        - Add Key/Value pairs:
+            - `login`: `api_agent` (or your dedicated integration user)
+            - `api_key`: `[Your_Odoo_API_Key]` (Generated in Odoo via User Settings)
+        - Name the secret: `odoo/integration/credentials`.
     - **Tavily API Key (for AI Research)**:
         - Choose **Other type of secret**.
         - Add a Key/Value pair: Key = `api_key`, Value = `[Your_Tavily_API_Key]`.

@@ -158,7 +158,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Action   = ["bedrock:InvokeModel"]
         Effect   = "Allow"
-        Resource = ["arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/anthropic.claude-3-5-sonnet-20240620-v1:0"]
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/anthropic.claude-4-6-sonnet-20260215-v1:0"]
       },
       {
         Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
@@ -208,7 +208,7 @@ resource "aws_iam_role_policy" "bedrock_kb_policy" {
       {
         Action   = ["bedrock:InvokeModel"]
         Effect   = "Allow"
-        Resource = ["arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.titan-embed-text-v2:0"]
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.nova-2-multimodal-embeddings-v1:0"]
       }
     ]
   })
@@ -269,4 +269,20 @@ resource "aws_iam_role_policy_attachment" "odoo_integrator_basic" {
 resource "aws_iam_role_policy_attachment" "odoo_integrator_vpc" {
   role       = aws_iam_role.odoo_integrator_lambda_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}
+
+resource "aws_iam_role_policy" "odoo_integrator_secrets_policy" {
+  name = "odoo-integrator-secrets-policy"
+  role = aws_iam_role.odoo_integrator_lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["secretsmanager:GetSecretValue"]
+        Effect   = "Allow"
+        Resource = data.aws_secretsmanager_secret.odoo_integration_credentials.arn
+      }
+    ]
+  })
 }
