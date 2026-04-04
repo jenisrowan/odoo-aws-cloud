@@ -4,7 +4,7 @@ resource "aws_bedrockagent_knowledge_base" "research_kb" {
   knowledge_base_configuration {
     type = "VECTOR"
     vector_knowledge_base_configuration {
-      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.nova-2-multimodal-embeddings-v1:0"
+      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.titan-embed-text-v2:0"
     }
   }
   storage_configuration {

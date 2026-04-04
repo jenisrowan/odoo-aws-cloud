@@ -219,7 +219,7 @@ resource "aws_iam_role_policy" "bedrock_kb_policy" {
       {
         Action   = ["bedrock:InvokeModel"]
         Effect   = "Allow"
-        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.nova-2-multimodal-embeddings-v1:0"]
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/amazon.titan-embed-text-v2:0"]
       }
     ]
   })
