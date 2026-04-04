@@ -178,7 +178,6 @@ resource "aws_ecs_service" "odoo" {
   service_registries {
     registry_arn   = aws_service_discovery_service.odoo.arn
     container_name = "odoo"
-    container_port = 8069
   }
 
   load_balancer {

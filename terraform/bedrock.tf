@@ -60,24 +60,29 @@ resource "aws_bedrockagent_agent_action_group" "web_search" {
     payload = jsonencode({
       "openapi" = "3.0.0",
       "info" = {
-        "title"   = "WebSearch API",
-        "version" = "1.0.0"
+        "title"       = "WebSearch API",
+        "description" = "API for searching news and internal documents",
+        "version"     = "1.0.0"
       },
       "paths" = {
         "/search" = {
           "post" = {
-            "summary"     = "Search the web for news or topics",
+            "summary"     = "Search web for news",
+            "description" = "Searches the public web for current news or context on a given query.",
             "operationId" = "SearchWeb",
+            "parameters"  = [],
             "requestBody" = {
-              "required" = true,
+              "description" = "The search query payload",
+              "required"    = true,
               "content" = {
                 "application/json" = {
                   "schema" = {
-                    "type" = "object",
+                    "type"        = "object",
+                    "description" = "Schema for search query",
                     "properties" = {
                       "query" = {
                         "type"        = "string",
-                        "description" = "The search query to search via Tavily."
+                        "description" = "The specific text to search for."
                       }
                     },
                     "required" = ["query"]
@@ -87,13 +92,17 @@ resource "aws_bedrockagent_agent_action_group" "web_search" {
             },
             "responses" = {
               "200" = {
-                "description" = "Successful search",
+                "description" = "Search results returned successfully",
                 "content" = {
                   "application/json" = {
                     "schema" = {
-                      "type" = "object",
+                      "type"        = "object",
+                      "description" = "Schema for search results",
                       "properties" = {
-                        "search_result" = { "type" = "string" }
+                        "search_result" = {
+                          "type"        = "string",
+                          "description" = "The summarized results from the web search."
+                        }
                       }
                     }
                   }
@@ -121,36 +130,41 @@ resource "aws_bedrockagent_agent_action_group" "odoo_integrator" {
     payload = jsonencode({
       "openapi" = "3.0.0",
       "info" = {
-        "title"   = "Odoo Integrator",
-        "version" = "1.0.0"
+        "title"       = "Odoo Integrator",
+        "description" = "Updates Odoo with research data",
+        "version"     = "1.0.0"
       },
       "paths" = {
         "/submit" = {
           "post" = {
-            "summary"     = "Submit final report to Odoo Partner record.",
+            "summary"     = "Submit final report to Odoo",
+            "description" = "Authenticates and creates a final research briefing on an Odoo Partner record.",
             "operationId" = "SubmitReport",
+            "parameters"  = [],
             "requestBody" = {
-              "required" = true,
+              "description" = "Research data payload",
+              "required"    = true,
               "content" = {
                 "application/json" = {
                   "schema" = {
-                    "type" = "object",
+                    "type"        = "object",
+                    "description" = "Schema for Odoo submission",
                     "properties" = {
                       "partner_id" = {
                         "type"        = "integer",
-                        "description" = "The ID of the Partner/Lead in Odoo."
+                        "description" = "Database ID for the Partner record."
                       },
                       "database_name" = {
                         "type"        = "string",
-                        "description" = "The exact name of the Odoo database to update."
+                        "description" = "Name of the target Odoo database."
                       },
                       "company_name" = {
                         "type"        = "string",
-                        "description" = "The name of the company researched."
+                        "description" = "The official name of the company being researched."
                       },
                       "report" = {
                         "type"        = "string",
-                        "description" = "The markdown or HTML report content."
+                        "description" = "Final markdown report content."
                       }
                     },
                     "required" = ["partner_id", "database_name", "company_name", "report"]
@@ -160,13 +174,17 @@ resource "aws_bedrockagent_agent_action_group" "odoo_integrator" {
             },
             "responses" = {
               "200" = {
-                "description" = "Successful submission",
+                "description" = "Update successful",
                 "content" = {
                   "application/json" = {
                     "schema" = {
-                      "type" = "object",
+                      "type"        = "object",
+                      "description" = "Schema for integrator response",
                       "properties" = {
-                        "status" = { "type" = "string" }
+                        "status" = {
+                          "type"        = "string",
+                          "description" = "Success or error message."
+                        }
                       }
                     }
                   }

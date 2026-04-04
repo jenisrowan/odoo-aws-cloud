@@ -189,9 +189,20 @@ resource "aws_iam_role" "bedrock_kb_role" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "bedrock_kb_opensearch" {
-  role       = aws_iam_role.bedrock_kb_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AmazonOpenSearchServerlessDataAccess"
+resource "aws_iam_role_policy" "bedrock_kb_oss_access_policy" {
+  name = "bedrock-kb-oss-access"
+  role = aws_iam_role.bedrock_kb_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action   = ["aoss:APIAccessAll", "aoss:DashboardsAccessAll"]
+        Effect   = "Allow"
+        Resource = [aws_opensearchserverless_collection.bedrock_kb.arn]
+      }
+    ]
+  })
 }
 
 resource "aws_iam_role_policy" "bedrock_kb_policy" {
