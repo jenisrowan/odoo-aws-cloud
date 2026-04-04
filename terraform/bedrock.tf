@@ -4,7 +4,7 @@ resource "aws_bedrockagent_knowledge_base" "research_kb" {
   knowledge_base_configuration {
     type = "VECTOR"
     vector_knowledge_base_configuration {
-      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.titan-embed-text-v2:0"
+      embedding_model_arn = "arn:aws:bedrock:${data.aws_region.current.name}::foundation-model/amazon.nova-2-multimodal-embeddings-v1:0"
     }
   }
   storage_configuration {
@@ -39,7 +39,7 @@ resource "aws_bedrockagent_data_source" "research_s3" {
 resource "aws_bedrockagent_agent" "supervisor" {
   agent_name                  = "CustomerResearchSupervisor"
   agent_resource_role_arn     = aws_iam_role.bedrock_agent_role.arn
-  foundation_model            = "anthropic.claude-3-5-sonnet-20240620-v1:0"
+  foundation_model            = "anthropic.claude-4-6-sonnet-20260215-v1:0"
   instruction                 = "You are a customer research supervisor. Your job is to compile a complete briefing by searching the web and the internal document vault to find all relevant information on a company. Once compiled, use the OdooIntegrator to push the final report back directly to Odoo."
   idle_session_ttl_in_seconds = 1800
 }

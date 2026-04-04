@@ -55,6 +55,6 @@ Notes:
   - [ RDS Postgres ] is a single instance with multi_az=true; AWS manages the standby replica automatically.
 
 Additional Infrastructure Notes (AI & Caching):
-  - [ Amazon Bedrock ] Supervisor Agent (Claude 3.5 Sonnet) orchestrating autonomous research workflows.
-  - [ Knowledge Base ] RAG implementation using OpenSearch Serverless as a vector database.
+  - [ Amazon Bedrock ] Supervisor Agent (Claude 4.6 Sonnet) orchestrating autonomous research workflows.
+  - [ Knowledge Base ] RAG implementation using Amazon Nova-2 embeddings and OpenSearch Serverless as a vector database.
   - [ Research Lambdas ] Functions ("Librarian" & "Odoo Integrator") that execute research and sync data.

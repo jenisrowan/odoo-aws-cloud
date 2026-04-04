@@ -55,9 +55,9 @@ This project provides a production-ready infrastructure for deploying **Odoo 19*
 ## AI-Powered Customer Research
 
 This infrastructure includes a built-in AI research pipeline using Amazon Bedrock:
-- **Supervisor Agent**: Orchestrates research tasks using Claude 3.5 Sonnet.
+- **Supervisor Agent**: Orchestrates research tasks using Claude 4.6 Sonnet.
 - **Web Search**: A "Librarian" Lambda function searches the web via **Tavily** for real-time news.
-- **Knowledge Base**: An RAG (Retrieval-Augmented Generation) system backed by **OpenSearch Serverless** allows the agent to search internal PDFs and 10-K filings stored in S3.
+- **Knowledge Base**: An RAG (Retrieval-Augmented Generation) system backed by **OpenSearch Serverless** and **Amazon Nova-2** allows the agent to search internal PDFs and 10-K filings stored in S3.
 - **Odoo Integration**: A dedicated "Odoo Integrator" Lambda pushes finalized reports directly into Odoo CRM records.
 
 ## Performance & Tuning
