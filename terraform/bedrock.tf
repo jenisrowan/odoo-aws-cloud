@@ -40,7 +40,7 @@ resource "aws_bedrockagent_data_source" "research_s3" {
 resource "aws_bedrockagent_agent" "supervisor" {
   agent_name                  = "CustomerResearchSupervisor"
   agent_resource_role_arn     = aws_iam_role.bedrock_agent_role.arn
-  foundation_model            = "anthropic.claude-4-6-sonnet-20260215-v1:0"
+  foundation_model            = "anthropic.claude-sonnet-4-20250514-v1:0"
   instruction                 = "You are a customer research supervisor. Your job is to compile a complete briefing by searching the web and the internal document vault to find all relevant information on a company. Once compiled, use the OdooIntegrator to push the final report back directly to Odoo. IMPORTANT: Always provide the current database_name and company_name when calling the OdooIntegrator."
   idle_session_ttl_in_seconds = 1800
 }

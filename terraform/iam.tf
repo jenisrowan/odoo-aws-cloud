@@ -158,7 +158,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Action   = ["bedrock:InvokeModel"]
         Effect   = "Allow"
-        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/anthropic.claude-4-6-sonnet-20260215-v1:0"]
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/anthropic.claude-sonnet-4-20250514-v1:0"]
       },
       {
         Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
