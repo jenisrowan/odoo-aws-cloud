@@ -169,6 +169,34 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
         Action   = ["lambda:InvokeFunction"]
         Effect   = "Allow"
         Resource = [aws_lambda_function.librarian.arn, aws_lambda_function.odoo_integrator.arn]
+      },
+      {
+        Action   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+        Effect   = "Allow"
+        Resource = [aws_cloudwatch_log_group.bedrock_agent_logs.arn, "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"]
+      }
+    ]
+  })
+}
+
+# 2.1 Allow Bedrock to deliver vended logs to CloudWatch
+resource "aws_cloudwatch_log_resource_policy" "bedrock_logging" {
+  policy_name = "BedrockLoggingPolicy"
+  policy_document = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Service = "bedrock.amazonaws.com"
+        }
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = [
+          "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"
+        ]
       }
     ]
   })

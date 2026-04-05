@@ -212,3 +212,20 @@ resource "aws_bedrockagent_agent_alias" "prod" {
   agent_id         = aws_bedrockagent_agent.supervisor.id
   description      = "Production alias for Odoo ECS integration"
 }
+
+# --- Logging and Monitoring ---
+
+resource "aws_cloudwatch_log_group" "bedrock_agent_logs" {
+  name              = "/aws/bedrock/agents/research-supervisor"
+  retention_in_days = 7
+}
+
+resource "aws_bedrock_model_invocation_logging_configuration" "agent_logs" {
+  depends_on = [aws_cloudwatch_log_group.bedrock_agent_logs]
+
+  cloudwatch_config {
+    log_group_name = aws_cloudwatch_log_group.bedrock_agent_logs.name
+    role_arn       = aws_iam_role.bedrock_agent_role.arn
+    status         = "ENABLED"
+  }
+}
