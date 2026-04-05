@@ -223,9 +223,11 @@ resource "aws_cloudwatch_log_group" "bedrock_agent_logs" {
 resource "aws_bedrock_model_invocation_logging_configuration" "agent_logs" {
   depends_on = [aws_cloudwatch_log_group.bedrock_agent_logs]
 
-  cloudwatch_config {
-    log_group_name = aws_cloudwatch_log_group.bedrock_agent_logs.name
-    role_arn       = aws_iam_role.bedrock_agent_role.arn
-    status         = "ENABLED"
+  logging_config {
+    text_data_delivery_enabled = true
+    cloudwatch_config {
+      log_group_name = aws_cloudwatch_log_group.bedrock_agent_logs.name
+      role_arn       = aws_iam_role.bedrock_agent_role.arn
+    }
   }
 }
