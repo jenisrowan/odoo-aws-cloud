@@ -67,7 +67,7 @@ jobs:
       id: build-nginx
       uses: docker/build-push-action@v7
       with:
-        context: templates/
+        context: .
         file: templates/Dockerfile.nginx
         push: true
         tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.NGINX_ECR_REPOSITORY }}:${{ github.sha }}
