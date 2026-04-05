@@ -192,8 +192,17 @@ resource "aws_ecs_service" "odoo" {
   }
 }
 
+# Unique ID for service discovery to avoid "ResourceInUse" errors during updates
+resource "random_id" "odoo_sd_id" {
+  byte_length = 2
+  keepers = {
+    # If the namespace changes, we need a new service discovery ID
+    namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
+  }
+}
+
 resource "aws_service_discovery_service" "odoo" {
-  name = "odoo"
+  name = "odoo-${random_id.odoo_sd_id.hex}"
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
@@ -207,6 +216,10 @@ resource "aws_service_discovery_service" "odoo" {
   }
 
   health_check_custom_config {
+  }
+
+  lifecycle {
+    create_before_destroy = true
   }
 }
 
