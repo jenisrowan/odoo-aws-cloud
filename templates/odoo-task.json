@@ -4,6 +4,7 @@
     "image": "${odoo_image_url}",
     "cpu": 1536,
     "memory": 6912,
+    "stopTimeout": 120,
     "essential": true,
     "portMappings": [
       {
@@ -73,6 +74,7 @@
     "image": "${nginx_image_url}",
     "cpu": 128,
     "memory": 128,
+    "stopTimeout": 120,
     "essential": true,
     "portMappings": [
       {

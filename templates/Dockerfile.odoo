@@ -15,8 +15,16 @@ RUN apt-get update && \
     python3-redis && \
     rm -rf /var/lib/apt/lists/*
 
+# Copy the graceful-shutdown entrypoint script
+COPY templates/docker-entrypoint.sh /docker-entrypoint-custom.sh
+RUN chmod +x /docker-entrypoint-custom.sh
+
 # Ensure correct ownership
 RUN chown odoo:odoo /etc/odoo/odoo.conf && \
     chown -R odoo:odoo /mnt/extra-addons
 
 USER odoo
+
+# Override the base image entrypoint so this script (PID 1) receives SIGTERM
+# from ECS and can execute the graceful drain sequence.
+ENTRYPOINT ["/docker-entrypoint-custom.sh"]

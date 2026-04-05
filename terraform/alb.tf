@@ -14,10 +14,11 @@ resource "aws_lb" "main" {
 # We don't want sticky session here - Sticky session feels like a temperory fix than a permanent solution
 # We will use a more robust EFS for session storage (in the future we might need to change it to ElastiCache)
 resource "aws_lb_target_group" "odoo" {
-  port        = 80
-  protocol    = "HTTP"
-  vpc_id      = aws_vpc.main.id
-  target_type = "ip"
+  port                 = 80
+  protocol             = "HTTP"
+  vpc_id               = aws_vpc.main.id
+  target_type          = "ip"
+  deregistration_delay = 60
 
   # Odoo's root path (/) redirects to /web/login (302), which ALB would treat
   # as unhealthy. Odoo's /web/health built-in endpoint that always returns 200.

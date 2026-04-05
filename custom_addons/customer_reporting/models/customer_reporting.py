@@ -14,7 +14,8 @@ def invoke_bedrock_agent(db_name, record_id, company_name):
     """
     Background thread to push status to Redis and invoke Bedrock Agent asynchronous processing.
     """
-    registry = odoo.registry(db_name)
+    registry = odoo.modules.registry.Registry(db_name)
+
     with registry.cursor() as cr:
         env = api.Environment(cr, odoo.SUPERUSER_ID, {})
         record = env['customer.reporting'].browse(record_id)
@@ -52,7 +53,7 @@ def invoke_bedrock_agent(db_name, record_id, company_name):
                 logger.info(f"Lambda sync not detected for {record_id}, falling back to AI completion text.")
                 record.report_file = base64.b64encode(report_text.encode('utf-8'))
                 record.report_filename = f"{company_name}_report.txt"
-           
+            
             logger.info(f"AI Research complete for {company_name}. Final message: {report_text[:100]}...")
                 
         except Exception as e:
