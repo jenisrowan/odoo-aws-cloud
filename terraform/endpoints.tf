@@ -26,7 +26,8 @@ locals {
     "ecr.api",
     "logs",
     "secretsmanager",
-    "bedrock-runtime"
+    "bedrock-runtime",
+    "autoscaling"
   ]
 }
 
