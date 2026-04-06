@@ -98,8 +98,6 @@ resource "aws_ecs_cluster_capacity_providers" "odoo" {
     capacity_provider = aws_ecs_capacity_provider.odoo.name
   }
 
-  # Ensure services are destroyed before detaching the capacity providers
-  depends_on = [aws_ecs_service.odoo, aws_ecs_service.pgbouncer]
 }
 
 
@@ -159,7 +157,7 @@ resource "aws_ecs_service" "odoo" {
   task_definition = aws_ecs_task_definition.odoo.arn
   desired_count   = 1
 
-  depends_on                        = [aws_ecs_service.pgbouncer]
+  depends_on                        = [aws_ecs_service.pgbouncer, aws_ecs_cluster_capacity_providers.odoo]
   health_check_grace_period_seconds = 90
   enable_execute_command            = true
 
