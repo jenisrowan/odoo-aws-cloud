@@ -97,6 +97,9 @@ resource "aws_ecs_cluster_capacity_providers" "odoo" {
     weight            = 100
     capacity_provider = aws_ecs_capacity_provider.odoo.name
   }
+
+  # Ensure services are destroyed before detaching the capacity providers
+  depends_on = [aws_ecs_service.odoo, aws_ecs_service.pgbouncer]
 }
 
 

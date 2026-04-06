@@ -43,6 +43,7 @@ resource "aws_bedrockagent_agent" "supervisor" {
   foundation_model            = "apac.anthropic.claude-sonnet-4-20250514-v1:0"
   instruction                 = "You are a customer research supervisor. Your job is to compile a complete briefing by searching the web and the internal document vault to find all relevant information on a company. Once compiled, use the OdooIntegrator to push the final report back directly to Odoo. IMPORTANT: Always provide the current database_name and company_name when calling the OdooIntegrator."
   idle_session_ttl_in_seconds = 1800
+  prepare_agent               = true
 }
 
 # (Actions Groups)
@@ -53,6 +54,10 @@ resource "aws_bedrockagent_agent_action_group" "web_search" {
   action_group_name  = "WebSearch"
   action_group_state = "ENABLED"
   description        = "Use this action to search the public web via Tavily to find recent news and context."
+
+  lifecycle {
+    create_before_destroy = true
+  }
   action_group_executor {
     lambda = aws_lambda_function.librarian.arn
   }
@@ -123,6 +128,10 @@ resource "aws_bedrockagent_agent_action_group" "odoo_integrator" {
   action_group_name  = "OdooIntegrator"
   action_group_state = "ENABLED"
   description        = "Use this action to submit the completed research briefing back to the Odoo ERP system."
+
+  lifecycle {
+    create_before_destroy = true
+  }
   action_group_executor {
     lambda = aws_lambda_function.odoo_integrator.arn
   }
