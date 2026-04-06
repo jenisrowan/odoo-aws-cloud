@@ -187,12 +187,21 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Action = [
           "logs:CreateLogStream",
-          "logs:PutLogEvents",
+          "logs:PutLogEvents"
+        ]
+        Effect   = "Allow"
+        Resource = [
+          aws_cloudwatch_log_group.bedrock_agent_logs.arn,
+          "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"
+        ]
+      },
+      {
+        Action = [
           "logs:DescribeLogGroups",
           "logs:DescribeLogStreams"
         ]
         Effect   = "Allow"
-        Resource = ["${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"]
+        Resource = ["*"]
       }
     ]
   })
@@ -214,6 +223,7 @@ resource "aws_cloudwatch_log_resource_policy" "bedrock_logging" {
           "logs:PutLogEvents"
         ]
         Resource = [
+          aws_cloudwatch_log_group.bedrock_agent_logs.arn,
           "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"
         ]
       }

@@ -230,7 +230,10 @@ resource "aws_cloudwatch_log_group" "bedrock_agent_logs" {
 }
 
 resource "aws_bedrock_model_invocation_logging_configuration" "agent_logs" {
-  depends_on = [aws_cloudwatch_log_group.bedrock_agent_logs]
+  depends_on = [
+    aws_cloudwatch_log_group.bedrock_agent_logs,
+    aws_iam_role_policy.bedrock_agent_policy
+  ]
 
   logging_config {
     text_data_delivery_enabled = true
