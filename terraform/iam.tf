@@ -144,6 +144,14 @@ resource "aws_iam_role" "bedrock_agent_role" {
         Action    = "sts:AssumeRole"
         Principal = { Service = "bedrock.amazonaws.com" }
         Effect    = "Allow"
+        Condition = {
+          StringEquals = {
+            "aws:SourceAccount" = data.aws_caller_identity.current.account_id
+          }
+          ArnLike = {
+            "aws:SourceArn" = "arn:aws:bedrock:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*"
+          }
+        }
       }
     ]
   })
@@ -158,7 +166,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Action   = ["bedrock:InvokeModel"]
         Effect   = "Allow"
-        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}:212950005413:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0"]
+        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0"]
       },
       {
         Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
@@ -171,9 +179,14 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
         Resource = [aws_lambda_function.librarian.arn, aws_lambda_function.odoo_integrator.arn]
       },
       {
-        Action   = ["logs:CreateLogStream", "logs:PutLogEvents"]
+        Action = [
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+          "logs:DescribeLogGroups",
+          "logs:DescribeLogStreams"
+        ]
         Effect   = "Allow"
-        Resource = [aws_cloudwatch_log_group.bedrock_agent_logs.arn, "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"]
+        Resource = ["${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"]
       }
     ]
   })
