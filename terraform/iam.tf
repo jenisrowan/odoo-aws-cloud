@@ -164,9 +164,15 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action   = ["bedrock:InvokeModel"]
+        Action   = [
+          "bedrock:InvokeModel",
+          "bedrock:InvokeModelWithResponseStream"
+        ]
         Effect   = "Allow"
-        Resource = ["arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:inference-profile/apac.anthropic.claude-sonnet-4-20250514-v1:0"]
+        Resource = [
+          "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/*"
+        ]
       },
       {
         Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
