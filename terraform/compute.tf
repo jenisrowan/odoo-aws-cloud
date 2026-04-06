@@ -195,16 +195,16 @@ resource "aws_ecs_service" "odoo" {
 
 # Unique ID for service discovery to avoid "ResourceInUse" errors during updates
 resource "random_id" "odoo_sd_id" {
-  byte_length = 2
+  byte_length = 4
   keepers = {
-    # Increment this version if you need to force a name rotation for SD
-    version      = "2"
+    # If the namespace changes, we need a new service discovery ID
     namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
   }
 }
 
 resource "aws_service_discovery_service" "odoo" {
-  name = "odoo-${random_id.odoo_sd_id.hex}"
+  name          = "odoo-${random_id.odoo_sd_id.hex}"
+  force_destroy = true
 
   dns_config {
     namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
