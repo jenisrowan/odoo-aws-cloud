@@ -175,14 +175,14 @@ resource "aws_ecs_service" "odoo" {
   service_connect_configuration {
     enabled   = true
     namespace = aws_service_discovery_private_dns_namespace.odoo.arn
-  }
-
-  # Registers Odoo task IPs in Cloud Map so the Bedrock Lambda
-  # can resolve odoo.odoo.local via DNS. Service Connect above runs in
-  # client-only mode (no services: block) so there is no name conflict.
-  service_registries {
-    registry_arn   = aws_service_discovery_service.odoo.arn
-    container_name = "odoo"
+    service {
+      port_name      = "odoo"
+      discovery_name = "odoo"
+      client_alias {
+        port     = 8069
+        dns_name = "odoo"
+      }
+    }
   }
 
   load_balancer {
@@ -197,30 +197,6 @@ resource "aws_ecs_service" "odoo" {
   }
 }
 
-# Stable Cloud Map service for Bedrock Lambda → Odoo DNS resolution (odoo.odoo.local).
-# ECS-to-ECS routing is handled automatically by Service Connect above.
-resource "aws_service_discovery_service" "odoo" {
-  name          = "odoo"
-  force_destroy = true
-
-  dns_config {
-    namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
-
-    dns_records {
-      ttl  = 60
-      type = "A"
-    }
-
-    routing_policy = "MULTIVALUE"
-  }
-
-  health_check_custom_config {
-  }
-
-  lifecycle {
-    create_before_destroy = true
-  }
-}
 
 # 5. Service Auto-Scaling (Task Count)
 resource "aws_appautoscaling_target" "ecs_target" {
