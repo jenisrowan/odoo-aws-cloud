@@ -18,6 +18,7 @@ resource "aws_service_discovery_private_dns_namespace" "odoo" {
   vpc         = aws_vpc.main.id
 }
 
+
 data "aws_ssm_parameter" "ecs_optimized_ami" {
   name = "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
 }
@@ -196,7 +197,8 @@ resource "aws_ecs_service" "odoo" {
 resource "random_id" "odoo_sd_id" {
   byte_length = 2
   keepers = {
-    # If the namespace changes, we need a new service discovery ID
+    # Increment this version if you need to force a name rotation for SD
+    version      = "2"
     namespace_id = aws_service_discovery_private_dns_namespace.odoo.id
   }
 }
