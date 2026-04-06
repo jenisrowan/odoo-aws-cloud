@@ -196,3 +196,28 @@ resource "aws_security_group" "valkey_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
+
+resource "aws_security_group" "vpc_endpoints_sg" {
+  name        = "odoo-vpc-endpoints-sg"
+  description = "Security group for VPC Interface Endpoints"
+  vpc_id      = aws_vpc.main.id
+
+  # Allow HTTPS ingress from the entire VPC CIDR
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = [aws_vpc.main.cidr_block]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "Odoo VPC Endpoints SG"
+  }
+}
