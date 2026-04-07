@@ -149,7 +149,7 @@ resource "aws_iam_role" "bedrock_agent_role" {
             "aws:SourceAccount" = data.aws_caller_identity.current.account_id
           }
           ArnLike = {
-            "aws:SourceArn" = "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:*"
+            "aws:SourceArn" = "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:*"
           }
         }
       }
@@ -166,12 +166,16 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
       {
         Action = [
           "bedrock:InvokeModel",
-          "bedrock:InvokeModelWithResponseStream"
+          "bedrock:InvokeModelWithResponseStream",
+          "bedrock:GetInferenceProfile",
+          "bedrock:ListInferenceProfiles",
+          "bedrock:GetFoundationModel",
+          "bedrock:ListFoundationModels"
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
-          "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/*"
+          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:*::foundation-model/*"
         ]
       },
       {
