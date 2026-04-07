@@ -134,7 +134,7 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke_policy" {
         Effect = "Allow"
         Resource = [
           aws_bedrockagent_agent.supervisor.agent_arn,
-          aws_bedrockagent_agent_alias.prod.agent_alias_arn
+          "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:agent-alias/${aws_bedrockagent_agent.supervisor.id}/*"
         ]
       }
     ]
@@ -182,8 +182,9 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/*",
-          "arn:aws:bedrock:*::foundation-model/*"
+          "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:${data.aws_region.current.id}::inference-profile/*",
+          "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/*"
         ]
       },
       {
