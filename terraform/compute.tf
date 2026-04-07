@@ -50,11 +50,16 @@ EOF
 
 # Autoscale physical EC2 servers
 resource "aws_autoscaling_group" "ecs_asg" {
+  name_prefix           = "odoo-asg-"
   vpc_zone_identifier   = [aws_subnet.private_a.id, aws_subnet.private_b.id]
   min_size              = 1
   max_size              = 4
   desired_capacity      = 1
   protect_from_scale_in = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   launch_template {
     id      = aws_launch_template.ecs.id
@@ -66,6 +71,12 @@ resource "aws_autoscaling_group" "ecs_asg" {
     value               = "odoo-ecs-node"
     propagate_at_launch = true
   }
+
+  tag {
+    key                 = "AmazonECSManaged"
+    value               = ""
+    propagate_at_launch = true
+  }
 }
 
 # 3. ECS Capacity Providers (Linking ASG to Cluster)
@@ -75,12 +86,13 @@ resource "aws_ecs_capacity_provider" "odoo" {
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs_asg.arn
     managed_termination_protection = "ENABLED"
+    managed_draining               = "ENABLED"
 
     managed_scaling {
       maximum_scaling_step_size = 2
       minimum_scaling_step_size = 1
       status                    = "ENABLED"
-      target_capacity           = 80
+      target_capacity           = 100
     }
   }
 }
