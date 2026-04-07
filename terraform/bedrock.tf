@@ -58,6 +58,7 @@ resource "aws_bedrockagent_agent_action_group" "web_search" {
   lifecycle {
     create_before_destroy = true
   }
+  skip_resource_in_use_check = true
   action_group_executor {
     lambda = aws_lambda_function.librarian.arn
   }
@@ -132,6 +133,7 @@ resource "aws_bedrockagent_agent_action_group" "odoo_integrator" {
   lifecycle {
     create_before_destroy = true
   }
+  skip_resource_in_use_check = true
   action_group_executor {
     lambda = aws_lambda_function.odoo_integrator.arn
   }

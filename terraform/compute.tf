@@ -166,6 +166,9 @@ resource "aws_ecs_service" "odoo" {
     weight            = 100
   }
 
+  deployment_minimum_healthy_percent = 0
+  deployment_maximum_percent         = 100
+
   network_configuration {
     subnets = [aws_subnet.private_a.id, aws_subnet.private_b.id]
     # Opens access to Nginx
