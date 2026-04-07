@@ -172,6 +172,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        # 1. Model Invocation & Metadata (Cross-Region supported via Resource *)
         Action = [
           "bedrock:InvokeModel",
           "bedrock:InvokeModelWithResponseStream",
@@ -180,24 +181,36 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
           "bedrock:GetFoundationModel",
           "bedrock:ListFoundationModels"
         ]
-        Effect = "Allow"
-        Resource = [
-          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/*",
-          "arn:aws:bedrock:*::inference-profile/*",
-          "arn:aws:bedrock:*::foundation-model/*"
-        ]
+        Effect   = "Allow"
+        Resource = ["*"]
       },
       {
+        # 2. Agent Identity (Required for orchestration state/alias resolution)
+        Action = [
+          "bedrock:GetAgent",
+          "bedrock:ListAgents",
+          "bedrock:GetAgentAlias",
+          "bedrock:ListAgentAliases",
+          "bedrock:GetAgentKnowledgeBase",
+          "bedrock:ListAgentKnowledgeBases"
+        ]
+        Effect   = "Allow"
+        Resource = ["arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:agent*"]
+      },
+      {
+        # 3. Knowledge Base Retrieval
         Action   = ["bedrock:Retrieve", "bedrock:RetrieveAndGenerate"]
         Effect   = "Allow"
         Resource = [aws_bedrockagent_knowledge_base.research_kb.arn]
       },
       {
+        # 4. Action Group Lambda Invocation
         Action   = ["lambda:InvokeFunction"]
         Effect   = "Allow"
         Resource = [aws_lambda_function.librarian.arn, aws_lambda_function.odoo_integrator.arn]
       },
       {
+        # 5. Native Logging (Trace Delivery)
         Action = [
           "logs:CreateLogStream",
           "logs:PutLogEvents"
@@ -207,14 +220,6 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
           aws_cloudwatch_log_group.bedrock_agent_logs.arn,
           "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"
         ]
-      },
-      {
-        Action = [
-          "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams"
-        ]
-        Effect   = "Allow"
-        Resource = ["*"]
       }
     ]
   })
