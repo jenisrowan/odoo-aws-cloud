@@ -126,13 +126,21 @@ resource "aws_iam_role_policy" "ecs_bedrock_invoke_policy" {
     Version = "2012-10-17"
     Statement = [
       {
-        Action   = ["bedrock:InvokeAgent"]
-        Effect   = "Allow"
-        Resource = aws_bedrockagent_agent.supervisor.agent_arn
+        Action = [
+          "bedrock:InvokeAgent",
+          "bedrock:GetAgent",
+          "bedrock:GetAgentAlias"
+        ]
+        Effect = "Allow"
+        Resource = [
+          aws_bedrockagent_agent.supervisor.agent_arn,
+          aws_bedrockagent_agent_alias.prod.agent_alias_arn
+        ]
       }
     ]
   })
 }
+
 
 # 2. Bedrock Supervisor Agent Role
 resource "aws_iam_role" "bedrock_agent_role" {
@@ -193,7 +201,7 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ]
-        Effect   = "Allow"
+        Effect = "Allow"
         Resource = [
           aws_cloudwatch_log_group.bedrock_agent_logs.arn,
           "${aws_cloudwatch_log_group.bedrock_agent_logs.arn}:*"
