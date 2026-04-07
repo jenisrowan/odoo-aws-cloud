@@ -76,6 +76,7 @@ resource "aws_opensearchserverless_access_policy" "data_access" {
       ]
       Principal = [
         aws_iam_role.bedrock_kb_role.arn,
+        aws_iam_role.bedrock_agent_role.arn,
         data.aws_caller_identity.current.arn
       ]
     }
