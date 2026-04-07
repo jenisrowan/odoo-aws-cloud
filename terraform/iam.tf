@@ -182,9 +182,9 @@ resource "aws_iam_role_policy" "bedrock_agent_policy" {
         ]
         Effect = "Allow"
         Resource = [
-          "arn:aws:bedrock:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:inference-profile/*",
-          "arn:aws:bedrock:${data.aws_region.current.id}::inference-profile/*",
-          "arn:aws:bedrock:${data.aws_region.current.id}::foundation-model/*"
+          "arn:aws:bedrock:*:${data.aws_caller_identity.current.account_id}:inference-profile/*",
+          "arn:aws:bedrock:*::inference-profile/*",
+          "arn:aws:bedrock:*::foundation-model/*"
         ]
       },
       {
