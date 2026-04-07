@@ -72,6 +72,7 @@ resource "aws_autoscaling_group" "ecs_asg" {
     propagate_at_launch = true
   }
 
+  # System tag - Tells the EC2 instance that it is managed by ECS Capacity Provider.
   tag {
     key                 = "AmazonECSManaged"
     value               = ""
@@ -79,9 +80,18 @@ resource "aws_autoscaling_group" "ecs_asg" {
   }
 }
 
+# Generate a random suffix to allow unique naming of capacity providers during replacement
+resource "random_id" "cp_suffix" {
+  byte_length = 4
+}
+
 # 3. ECS Capacity Providers (Linking ASG to Cluster)
 resource "aws_ecs_capacity_provider" "odoo" {
-  name = "odoo-capacity-provider"
+  name = "odoo-cp-${random_id.cp_suffix.hex}"
+
+  lifecycle {
+    create_before_destroy = true
+  }
 
   auto_scaling_group_provider {
     auto_scaling_group_arn         = aws_autoscaling_group.ecs_asg.arn
